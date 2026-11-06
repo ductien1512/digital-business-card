@@ -874,18 +874,6 @@
             }
         }
 
-                new QRCode(document.getElementById("qrcode"), {
-                    text: window.location.href.includes('http') ? window.location.href : "https://zalo.me/0396558306",
-                    width: 220,
-                    height: 220,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
-                qrGenerated = true;
-            }
-        }
-
         // Language management
         function setLanguage(lang) {
             localStorage.setItem('lang', lang);
