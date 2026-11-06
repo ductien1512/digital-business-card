@@ -346,7 +346,42 @@
             .theme-toggle { top: 14px; left: 14px; width: 38px; height: 38px; }
             .lang-toggle { top: 14px; right: 14px; }
         }
+        /* Professional QR panel */
+        #qr-container {
+            width: min(100%, 300px);
+            margin-left: auto;
+            margin-right: auto;
+            padding: 18px !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(37, 99, 235, .16) !important;
+            border-radius: 22px !important;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, .12) !important;
+        }
+        #qrcode {
+            width: 240px;
+            height: 240px; 
+            max-width: 100%; 
+            margin: 0 auto;  
+            padding: 10px; 
+            display: flex; 
+            align-items: center;  
+            justify-content: center;  
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, .08);
+        }
 
+        #qrcode img,
+        #qrcode canvas {
+            display: block;
+            width: 220px !important;
+            height: 220px !important;
+            max-width: 100%;
+            max-height: 100%;
+            margin: 0 auto;
+            image-rendering: pixelated;
+        }
+        
         .firebase-error {
             position: fixed;
             left: 20px;
@@ -487,7 +522,7 @@
                 <button onclick="toggleQR()" class="text-sm text-gray-500 hover:text-blue-600 font-medium flex items-center justify-center mx-auto transition-colors">
                     <i class="fas fa-qrcode mr-2"></i> <span data-lang="qr-btn">Hiện mã QR của tôi</span>
                 </button>
-                <div id="qr-container" class="hidden mt-4 p-4 bg-white border rounded-2xl shadow-inner">
+                <div id="qr-container" class="hidden mt-4 bg-white border rounded-2xl shadow-inner" aria-label="Mã QR liên hệ">
                     <div id="qrcode"></div>
                     <p data-lang="qr-hint" class="text-xs text-gray-400 mt-2">Quét để lưu thông tin</p>
                 </div>
@@ -820,13 +855,29 @@
         function toggleQR() {
             const container = document.getElementById('qr-container');
             container.classList.toggle('hidden');
-            
-            if (!qrGenerated) {
+            if (!qrGenerated) {      
                 trackEvent('show_qr_code');
+                const qrElement = document.getElementById("qrcode");
+                qrElement.innerHTML = '';
+                new QRCode(qrElement, {
+                    text: window.location.href.includes('http')
+                        ? window.location.href
+                        : "https://zalo.me/0396558306",
+                    width: 220,
+                    height: 220,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+   
+                qrGenerated = true;
+            }
+        }
+
                 new QRCode(document.getElementById("qrcode"), {
                     text: window.location.href.includes('http') ? window.location.href : "https://zalo.me/0396558306",
-                    width: 160,
-                    height: 160,
+                    width: 220,
+                    height: 220,
                     colorDark : "#000000",
                     colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.H
