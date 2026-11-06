@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         :root { --admin-primary: #2563eb; --admin-secondary: #7c3aed; }
@@ -371,8 +372,8 @@
                 <div class="form-group">
                     <label class="form-label">Hoặc tải ảnh lên</label>
                     <input type="file" id="imageFile" class="form-input" accept="image/*" onchange="previewImage()">
-                    <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-                        <i class="fas fa-info-circle mr-1"></i>Ảnh chỉ xem trước tạm thời; hãy dán URL cloud vào ô phía trên để lưu ảnh nhẹ và ổn định.
+                    <p id="uploadStatus" style="font-size: 12px; color: #6b7280; margin-top: 8px; line-height: 1.5;">
+                        <i class="fas fa-cloud-upload-alt mr-1"></i>Chọn ảnh để tải lên Firebase Storage. Sau khi tải xong, bấm “Cập nhật thông tin” để lưu.
                     </p>
                 </div>
             </div>
@@ -435,6 +436,8 @@
         // Initialize Firebase (compat SDK is loaded above)
         let auth;
         let database;
+        let storage;
+        let imageUploadInProgress = false;
         try {
             if (!window.firebase || typeof firebase.initializeApp !== 'function') {
                 throw new Error('Firebase SDK chưa tải được. Hãy kiểm tra kết nối mạng hoặc CDN.');
@@ -442,6 +445,7 @@
             firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             database = firebase.database();
+            storage = firebase.storage();
         } catch (error) {
             showFirebaseConfigError(error.message);
         }
@@ -567,6 +571,14 @@
 
         // Update profile
         function updateProfile() {
+            if (!database) {
+                showFirebaseConfigError('Firebase chưa được khởi tạo.');
+                return;
+            }
+            if (imageUploadInProgress) {
+                showError('adminError', 'Ảnh đang được tải lên. Vui lòng chờ tải xong rồi bấm cập nhật.');
+                return;
+            }
             const profileData = {
                 name: document.getElementById('fullName').value,
                 phone: document.getElementById('phone').value,
@@ -604,17 +616,71 @@
             }
         }
 
-        // Preview image
+        // Preview locally, then upload the selected image to Firebase Storage.
         function previewImage() {
-            const file = document.getElementById('imageFile').files[0];
-            if (file) {
-                const previewUrl = URL.createObjectURL(file);
-                const preview = document.getElementById('previewImg');
-                preview.onload = () => URL.revokeObjectURL(previewUrl);
-                preview.src = previewUrl;
-                preview.style.display = 'block';
-                document.getElementById('previewIcon').style.display = 'none';
+            const fileInput = document.getElementById('imageFile');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            if (!file.type || !file.type.startsWith('image/')) {
+                fileInput.value = '';
+                setUploadStatus('File đã chọn không phải là ảnh hợp lệ.', true);
+                return;
             }
+            if (file.size > 5 * 1024 * 1024) {
+                fileInput.value = '';
+                setUploadStatus('Ảnh không được lớn hơn 5MB.', true);
+                return;
+            }
+
+            const previewUrl = URL.createObjectURL(file);
+            const preview = document.getElementById('previewImg');
+            preview.onload = () => URL.revokeObjectURL(previewUrl);
+            preview.src = previewUrl;
+            preview.style.display = 'block';
+            document.getElementById('previewIcon').style.display = 'none';
+            uploadProfileImage(file);
+        }
+
+        function setUploadStatus(message, isError = false) {
+            const status = document.getElementById('uploadStatus');
+            if (!status) return;
+            status.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-cloud-upload-alt'} mr-1"></i>${message}`;
+            status.style.color = isError ? '#dc2626' : '#6b7280';
+        }
+
+        function uploadProfileImage(file) {
+            if (!auth || !auth.currentUser) {
+                setUploadStatus('Bạn cần đăng nhập Admin trước khi tải ảnh.', true);
+                return;
+            }
+            if (!storage || typeof storage.ref !== 'function') {
+                setUploadStatus('Firebase Storage chưa được tải. Hãy kiểm tra SDK Storage.', true);
+                return;
+            }
+
+            imageUploadInProgress = true;
+            setUploadStatus('Đang tải ảnh lên Firebase Storage... 0%');
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const imageRef = storage.ref(`profile-images/${auth.currentUser.uid}/${Date.now()}-${safeName}`);
+            const uploadTask = imageRef.put(file, { contentType: file.type });
+
+            uploadTask.on('state_changed', (snapshot) => {
+                const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                setUploadStatus(`Đang tải ảnh lên Firebase Storage... ${percent}%`);
+            }, (error) => {
+                imageUploadInProgress = false;
+                setUploadStatus(`Tải ảnh thất bại: ${error.message}`, true);
+            }, () => {
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                    document.getElementById('profileImage').value = downloadURL;
+                    imageUploadInProgress = false;
+                    setUploadStatus('Đã tải ảnh thành công. Bây giờ hãy bấm “Cập nhật thông tin” để lưu.');
+                }).catch((error) => {
+                    imageUploadInProgress = false;
+                    setUploadStatus(`Không lấy được URL ảnh: ${error.message}`, true);
+                });
+            });
         }
 
         // Tab switching
