@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         :root { --admin-primary: #2563eb; --admin-secondary: #7c3aed; }
@@ -373,9 +372,11 @@
                     <label class="form-label">Hoặc tải ảnh lên</label>
                     <input type="file" id="imageFile" class="form-input" accept="image/*" onchange="previewImage()">
                     <p id="uploadStatus" style="font-size: 12px; color: #6b7280; margin-top: 8px; line-height: 1.5;">
-                        <i class="fas fa-cloud-upload-alt mr-1"></i>Chọn ảnh để tải lên Firebase Storage. Sau khi tải xong, bấm “Cập nhật thông tin” để lưu.
+                        <i class="fas fa-cloud-upload-alt mr-1"></i>Chọn ảnh để tải lên Cloudinary Free. Sau khi tải xong, bấm “Cập nhật thông tin” để lưu.
                     </p>
-                </div>
+                    <p class="cloudinary-help" style="font-size: 12px; color: #6b7280; margin-top: 8px; line-height: 1.5;">
+                        <i class="fas fa-info-circle mr-1"></i>Cloudinary Free không cần Firebase Storage hay thanh toán. Cần cấu hình Cloud name và unsigned upload preset trong mã Admin.
+                    </p>                </div>
             </div>
 
             <!-- Tab: Theme -->
@@ -436,8 +437,12 @@
         // Initialize Firebase (compat SDK is loaded above)
         let auth;
         let database;
-        let storage;
         let imageUploadInProgress = false;
+
+        // Cloudinary Free unsigned upload configuration.
+        // Replace these two values with your Cloudinary Cloud name and unsigned upload preset.
+        const CLOUDINARY_CLOUD_NAME = 'YOUR_CLOUDINARY_CLOUD_NAME';
+        const CLOUDINARY_UPLOAD_PRESET = 'YOUR_UNSIGNED_UPLOAD_PRESET';
         try {
             if (!window.firebase || typeof firebase.initializeApp !== 'function') {
                 throw new Error('Firebase SDK chưa tải được. Hãy kiểm tra kết nối mạng hoặc CDN.');
@@ -445,7 +450,6 @@
             firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             database = firebase.database();
-            storage = firebase.storage();
         } catch (error) {
             showFirebaseConfigError(error.message);
         }
@@ -654,33 +658,41 @@
                 setUploadStatus('Bạn cần đăng nhập Admin trước khi tải ảnh.', true);
                 return;
             }
-            if (!storage || typeof storage.ref !== 'function') {
-                setUploadStatus('Firebase Storage chưa được tải. Hãy kiểm tra SDK Storage.', true);
+            if (CLOUDINARY_CLOUD_NAME.includes('YOUR_') || CLOUDINARY_UPLOAD_PRESET.includes('YOUR_')) {
+                setUploadStatus('Chưa cấu hình Cloudinary. Hãy điền CLOUD_NAME và UPLOAD_PRESET trong mã Admin.', true);
                 return;
             }
 
             imageUploadInProgress = true;
-            setUploadStatus('Đang tải ảnh lên Firebase Storage... 0%');
-            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-            const imageRef = storage.ref(`profile-images/${auth.currentUser.uid}/${Date.now()}-${safeName}`);
-            const uploadTask = imageRef.put(file, { contentType: file.type });
+            setUploadStatus('Đang tải ảnh lên Cloudinary... 0%');
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
-            uploadTask.on('state_changed', (snapshot) => {
-                const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                setUploadStatus(`Đang tải ảnh lên Firebase Storage... ${percent}%`);
-            }, (error) => {
-                imageUploadInProgress = false;
-                setUploadStatus(`Tải ảnh thất bại: ${error.message}`, true);
-            }, () => {
-                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                    document.getElementById('profileImage').value = downloadURL;
-                    imageUploadInProgress = false;
-                    setUploadStatus('Đã tải ảnh thành công. Bây giờ hãy bấm “Cập nhật thông tin” để lưu.');
-                }).catch((error) => {
-                    imageUploadInProgress = false;
-                    setUploadStatus(`Không lấy được URL ảnh: ${error.message}`, true);
-                });
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `https://api.cloudinary.com/v1_1/${encodeURIComponent(CLOUDINARY_CLOUD_NAME)}/image/upload`);
+            xhr.upload.addEventListener('progress', (event) => {
+                if (event.lengthComputable) {
+                    const percent = Math.round((event.loaded / event.total) * 100);
+                    setUploadStatus(`Đang tải ảnh lên Cloudinary... ${percent}%`);
+                }
             });
+            xhr.onload = () => {
+                imageUploadInProgress = false;
+                let result = {};
+                try { result = JSON.parse(xhr.responseText || '{}'); } catch (error) {}
+                if (xhr.status >= 200 && xhr.status < 300 && result.secure_url) {
+                    document.getElementById('profileImage').value = result.secure_url;
+                    setUploadStatus('Đã tải ảnh thành công. Bấm “Cập nhật thông tin” để lưu.');
+                } else {
+                    setUploadStatus(`Cloudinary từ chối ảnh: ${result.error?.message || `HTTP ${xhr.status}`}`, true);
+                }
+            };
+            xhr.onerror = () => {
+                imageUploadInProgress = false;
+                setUploadStatus('Không kết nối được Cloudinary. Kiểm tra mạng hoặc cấu hình upload preset.', true);
+            };
+            xhr.send(formData);
         }
 
         // Tab switching
