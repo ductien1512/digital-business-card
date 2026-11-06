@@ -46,11 +46,12 @@
         }
         .form-input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 11px 14px;
             border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 14px;
             transition: all 0.3s;
+            background: #ffffff;
         }
         .form-input:focus {
             outline: none;
@@ -92,6 +93,39 @@
         .btn-secondary:hover {
             opacity: 0.9;
         }
+        .action-buttons {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(110px, .42fr);
+            gap: 10px;
+            margin-top: 22px;
+        }
+        .action-buttons .btn { width: 100%; margin: 0; }
+        .btn-danger {
+            background: #fff1f2;
+            color: #be123c;
+            border: 1px solid #fecdd3;
+        }
+        .btn-danger:hover { background: #ffe4e6; }
+        .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+        .file-picker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 14px;
+            border: 1px dashed #93c5fd;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s ease, border-color .2s ease, transform .2s ease;
+        }
+        .file-picker:hover { background: #dbeafe; border-color: var(--admin-primary); }
+        .file-picker:active { transform: scale(.99); }
         .auth-form {
             display: block;
         }
@@ -156,16 +190,24 @@
         }
         .tabs {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             margin-bottom: 20px;
             border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
         }
         .tab-btn {
-            padding: 12px 16px;
+            flex: 0 0 auto;
+            min-width: 96px;
+            padding: 11px 12px;
             background: none;
             border: none;
             cursor: pointer;
             font-weight: 600;
+            font-size: 13px;
+            white-space: nowrap;
             color: #6b7280;
             border-bottom: 3px solid transparent;
             transition: all 0.3s;
@@ -188,35 +230,32 @@
         .theme-swatch.creative { background: linear-gradient(135deg, #db2777, #f97316); }
         .theme-swatch.ocean { background: linear-gradient(135deg, #0891b2, #2563eb); }
 
-        /* Mobile layout: keep all four tabs inside the card instead of forcing horizontal overflow. */
+        /* Mobile layout: compact preview and one-row horizontally scrollable navigation. */
         @media (max-width: 640px) {
             body { overflow-x: hidden; }
             .container { width: 100%; padding: 12px; }
             .card { width: 100%; padding: 22px 16px; margin-top: 18px; }
             .header { margin-bottom: 22px; }
             .header h1 { font-size: clamp(22px, 7vw, 28px); line-height: 1.25; }
-            .tabs {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 0;
-                border-bottom: 0;
-                width: 100%;
-            }
+            .profile-preview { margin-bottom: 18px; padding: 13px 12px; }
+            .profile-preview img { width: 76px; height: 76px; margin-bottom: 6px; border-width: 3px; }
+            .profile-preview i { font-size: 38px !important; }
+            .profile-preview p { margin-top: 4px; font-size: 13px; }
+            .tabs { margin: 0 -4px 18px; padding: 0 4px 2px; }
             .tab-btn {
-                min-width: 0;
-                width: 100%;
-                min-height: 58px;
-                padding: 10px 5px;
+                min-width: 92px;
+                min-height: 44px;
+                padding: 9px 10px;
                 font-size: 12px;
-                line-height: 1.25;
-                white-space: normal;
-                overflow-wrap: anywhere;
-                border: 1px solid #e5e7eb;
+                border-bottom-width: 3px;
             }
-            .tab-btn.active { border-color: var(--admin-primary); }
+            .tab-btn i { margin-right: 4px !important; }
             .theme-option { min-width: 0; padding: 12px 10px; }
             .theme-option > span:last-child { min-width: 0; overflow-wrap: anywhere; }
             .form-input { max-width: 100%; }
+            .form-group { margin-bottom: 16px; }
+            .action-buttons { grid-template-columns: 1fr 108px; gap: 8px; margin-top: 18px; }
+            .action-buttons .btn { padding: 11px 8px; font-size: 13px; }
         }
 
     </style>
@@ -304,7 +343,7 @@
             <!-- Tabs -->
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('personal')">
-                    <i class="fas fa-user mr-2"></i>Thông tin cá nhân
+                    <i class="fas fa-user mr-2"></i>Thông tin
                 </button>
                 <button class="tab-btn" onclick="switchTab('social')">
                     <i class="fas fa-share-alt mr-2"></i>Mạng xã hội
@@ -370,7 +409,11 @@
 
                 <div class="form-group">
                     <label class="form-label">Hoặc tải ảnh lên</label>
-                    <input type="file" id="imageFile" class="form-input" accept="image/*" onchange="previewImage()">
+                    <label for="imageFile" class="file-picker">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>Chọn ảnh từ thiết bị</span>
+                    </label>
+                    <input type="file" id="imageFile" class="file-input" accept="image/*" onchange="previewImage()">
                     <p id="uploadStatus" style="font-size: 12px; color: #6b7280; margin-top: 8px; line-height: 1.5;">
                         <i class="fas fa-cloud-upload-alt mr-1"></i>Chọn ảnh để tải lên Cloudinary Free. Sau khi tải xong, bấm “Cập nhật thông tin” để lưu.
                     </p>
@@ -402,13 +445,15 @@
             </div>
 
             <!-- Action Buttons -->
-            <button onclick="updateProfile()" class="btn btn-primary">
-                <i class="fas fa-save mr-2"></i>Cập nhật thông tin
-            </button>
+            <div class="action-buttons">
+                <button onclick="updateProfile()" class="btn btn-primary">
+                    <i class="fas fa-save mr-2"></i>Cập nhật
+                </button>
 
-            <button onclick="logout()" class="btn btn-danger">
-                <i class="fas fa-sign-out-alt mr-2"></i>Đăng xuất
-            </button>
+                <button onclick="logout()" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Đăng xuất
+                </button>
+            </div>
         </div>
 
         <!-- Loading State -->
