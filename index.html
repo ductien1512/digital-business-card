@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trần Đức Tiền - Digital Business Card</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-541399676"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-541399676');
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate.css: hiệu ứng xuất hiện nhẹ, tối ưu cho mobile -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        :root {
+            --primary-color: #2563eb; --secondary-color: #7c3aed;
+            --bg-color: #f3f4f6; --bg-color-end: #d1d5db;
+            --surface-color: #ffffff; --soft-surface-color: #f9fafb;
+            --text-color: #111827; --muted-color: #6b7280;
+            --border-color: #e5e7eb; --accent-soft: #dbeafe;
+        }
+        body.theme-creative {
+            --primary-color: #db2777; --secondary-color: #f97316;
+            --bg-color: #fff1f2; --bg-color-end: #fed7aa;
+            --surface-color: #fffaf5; --soft-surface-color: #fff7ed;
+            --text-color: #431407; --muted-color: #9a3412;
+            --border-color: #fed7aa; --accent-soft: #fce7f3;
+        }
+        body.theme-ocean {
+            --primary-color: #0891b2; --secondary-color: #2563eb;
+            --bg-color: #ecfeff; --bg-color-end: #bfdbfe;
+            --surface-color: #f8fdff; --soft-surface-color: #effcff;
+            --text-color: #082f49; --muted-color: #155e75;
+            --border-color: #bae6fd; --accent-soft: #cffafe;
+        }
+        /* Dark Mode palette; primary/secondary vẫn kế thừa từ theme đang chọn */
+        body.dark-mode {
+            --bg-color: #070b14;
+            --bg-color-end: #111827;
+            --surface-color: #111827;
+            --soft-surface-color: #1f2937;
+            --text-color: #e5e7eb;
+            --muted-color: #a7b0c0;
+            --border-color: #374151;
+            --accent-soft: #243b63;
+            color-scheme: dark;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-color) 0%, var(--bg-color-end) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: var(--surface-color);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .header-bg {
+            height: 120px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        }
+        .profile-img-container {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid white;
+            background: white;
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .profile-img-container {
+            isolation: isolate;
+        }
+        .profile-img-container::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            border-radius: 50%;
+            background: linear-gradient(110deg, #e5e7eb 25%, #f8fafc 37%, #e5e7eb 63%);
+            background-size: 200% 100%;
+            animation: profileSkeleton 1.2s ease-in-out infinite;
+        }
+        .profile-img-container img {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            filter: blur(14px);
+            transform: scale(1.04);
+            transition: opacity .45s ease, filter .55s ease, transform .55s ease;
+        }
+        .profile-img-container.image-loaded::before { display: none; }
+        .profile-img-container.image-loaded img {
+            opacity: 1;
+            filter: blur(0);
+            transform: scale(1);
+        }
+        .profile-img-container.image-error::before { display: none; }
+        @keyframes profileSkeleton {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .profile-img-container::before { animation: none; }
+            .profile-img-container img { transition: none; }
+        }
+        .profile-img-container i {
+            font-size: 48px;
+            color: #d1d5db;
+        }
+        .copy-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+            pointer-events: none;
+            z-index: 100;
+        }
+        #qrcode img {
+            margin: 0 auto;
+        }
+        /* Language Toggle Styles */
+        .lang-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            z-index: 1000;
+            border: 1px solid #f3f4f6;
+        }
+        .lang-btn {
+            cursor: pointer;
+            color: #9ca3af;
+            transition: all 0.3s;
+        }
+        .lang-btn.active {
+            color: var(--primary-color);
+        }
+        .lang-btn:hover {
+            color: #4b5563;
+        }
+        /* Contact Form Styles */
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        .form-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 4px;
+            margin-top: 12px;
+        }
+        .submit-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 700;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .submit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #059669;
+            background-color: #ecfdf5;
+            border-radius: 12px;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+        .vcard-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .vcard-button:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .vcard-button:active {
+            transform: translateY(0);
+        }
+        .action-btn {
+            transition: all 0.2s;
+        }
+        .action-btn:active {
+            transform: scale(0.9);
+        }
+        .contact-item {
+            padding: 12px;
+            background-color: var(--soft-surface-color);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f9fafb;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .contact-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background-color: var(--accent-soft);
+        }
+        .theme-transition, .theme-transition * { transition: background-color .25s ease, color .25s ease, border-color .25s ease, box-shadow .25s ease; }
+        .text-blue-600, .text-indigo-600 { color: var(--primary-color) !important; }
+        .text-gray-900, .text-gray-800 { color: var(--text-color) !important; }
+        .text-gray-500, .text-gray-400 { color: var(--muted-color) !important; }
+        .bg-gray-50, .bg-gray-100 { background-color: var(--soft-surface-color) !important; }
+        .bg-blue-100, .bg-sky-100, .bg-purple-100, .bg-indigo-100 { background-color: var(--accent-soft) !important; }
+        .border-gray-100, .border-gray-200 { border-color: var(--border-color) !important; }
+        /* Entrance animations: animate.css + delay theo thứ tự xuất hiện */
+        [data-animate] {
+            --animation-delay: 0ms;
+            animation-delay: var(--animation-delay);
+            animation-duration: .7s;
+            animation-fill-mode: both;
+        }
+        .profile-img-container[data-animate] { animation-duration: .65s; }
+        @media (prefers-reduced-motion: reduce) {
+            [data-animate], [data-animate].animate__animated {
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* Dark Mode component overrides */
+        body.dark-mode .card { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .55); }
+        body.dark-mode .profile-img-container { border-color: #f3f4f6; background: #1f2937; }
+        body.dark-mode .profile-img-container i { color: #6b7280; }
+        body.dark-mode .lang-toggle,
+        body.dark-mode .theme-toggle { background: #111827; border-color: #374151; color: #e5e7eb; }
+        body.dark-mode .form-input { background: #111827; color: var(--text-color); border-color: var(--border-color); }
+        body.dark-mode .form-input::placeholder { color: #8490a3; }
+        body.dark-mode #qr-container { background: #f8fafc !important; }
+        body.dark-mode .success-message { background: #064e3b; color: #a7f3d0; }
+        body.dark-mode .contact-item { background-color: var(--soft-surface-color); }
+        body.dark-mode .contact-item:hover { background-color: var(--accent-soft); }
+        body.dark-mode .bg-white { background-color: #1f2937 !important; }
+        body.dark-mode .hover\:bg-gray-100:hover { background-color: #374151 !important; }
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            width: 42px;
+            height: 42px;
+            border: 1px solid #e5e7eb;
+            border-radius: 50%;
+            background: #ffffff;
+            color: #374151;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+            transition: transform .2s ease, background-color .25s ease, color .25s ease, border-color .25s ease;
+        }
+        .theme-toggle:hover { transform: translateY(-2px); }
+        .theme-toggle:active { transform: scale(.94); }
+        .theme-toggle:focus-visible { outline: 3px solid var(--primary-color); outline-offset: 3px; }
+        .theme-toggle .fa-sun { display: inline-block; }
+        .theme-toggle .fa-moon { display: none; }
+        body.dark-mode .theme-toggle .fa-sun { display: none; }
+        body.dark-mode .theme-toggle .fa-moon { display: inline-block; }
+        @media (max-width: 480px) {
+            .theme-toggle { top: 14px; left: 14px; width: 38px; height: 38px; }
+            .lang-toggle { top: 14px; right: 14px; }
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle -->
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Bật giao diện tối" aria-pressed="false" title="Bật giao diện tối">
+        <i class="fas fa-sun" aria-hidden="true"></i>
+        <i class="fas fa-moon" aria-hidden="true"></i>
+        <span class="sr-only">Chuyển đổi giao diện sáng/tối</span>
+    </button>
+
+    <!-- Language Toggle -->
+    <div class="lang-toggle">
+        <span id="lang-vi" class="lang-btn active" onclick="setLanguage('vi')">VI</span>
+        <span class="text-gray-300">|</span>
+        <span id="lang-en" class="lang-btn" onclick="setLanguage('en')">EN</span>
+    </div>
+
+    <div id="loading" class="loading">
+        <i class="fas fa-spinner fa-spin mr-2"></i> Đang tải...
+    </div>
+
+    <div id="card-container" style="display: none;">
+        <div class="card">
+            <!-- Header -->
+            <div class="header-bg"></div>
+            
+            <!-- Profile Info -->
+            <div class="profile-img-container is-loading" data-animate="animate__zoomIn" style="--animation-delay: 100ms;">
+                <img id="profileImg" src="" alt="Ảnh đại diện Trần Đức Tiền" loading="lazy" decoding="async" onerror="handleProfileImageError()" onload="handleProfileImageLoad()">
+                <i id="profileIcon" class="fas fa-user" style="display: none;"></i>
+            </div>
+            
+            <!-- Name and Title -->
+            <div class="text-center px-6 pb-4" data-animate="animate__fadeInUp" style="margin-top: 60px; --animation-delay: 220ms;">
+                <h1 id="userName" class="text-2xl font-bold text-gray-900">Trần Đức Tiền</h1>
+                <p data-lang="sub-title" class="text-blue-600 font-medium tracking-wide uppercase text-sm">Digital Business Card</p>
+            </div>
+
+            <!-- Contact Items -->
+            <div class="px-6 space-y-3">
+                <!-- Phone -->
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 340ms;" onclick="copyText(document.getElementById('userPhone').textContent, 'Số điện thoại')">
+                    <div class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg mr-3">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p data-lang="phone-label" class="text-xs text-gray-400 uppercase font-semibold">Điện thoại</p>
+                        <p id="userPhone" class="text-gray-800 font-medium">+84396558306</p>
+                    </div>
+                    <div class="hidden group-hover:flex space-x-2">
+                        <a href="" id="callLink" class="action-btn p-2 text-blue-600 hover:bg-blue-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'phone'})">
+                            <i class="fas fa-phone-alt"></i>
+                        </a>
+                        <a href="" id="smsLink" class="action-btn p-2 text-green-600 hover:bg-green-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'sms'})">
+                            <i class="fas fa-comment"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Zalo -->
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 430ms;" onclick="copyText(document.getElementById('userZalo').textContent, 'Zalo')">
+                    <div class="w-10 h-10 flex items-center justify-center bg-sky-100 text-sky-600 rounded-lg mr-3">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p data-lang="zalo-label" class="text-xs text-gray-400 uppercase font-semibold">Zalo</p>
+                        <p id="userZalo" class="text-gray-800 font-medium">Trần Đức Tiền</p>
+                    </div>
+                    <div class="hidden group-hover:flex">
+                        <a href="" id="zaloLink" target="_blank" class="action-btn p-2 text-sky-600 hover:bg-sky-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'zalo'})">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 520ms;" onclick="copyText(document.getElementById('userEmail').textContent, 'Email')">
+                    <div class="w-10 h-10 flex items-center justify-center bg-purple-100 text-purple-600 rounded-lg mr-3">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p data-lang="email-label" class="text-xs text-gray-400 uppercase font-semibold">Email</p>
+                        <p id="userEmail" class="text-gray-800 font-medium">hierductien@gmail.com</p>
+                    </div>
+                    <div class="hidden group-hover:flex">
+                        <a href="" id="emailLink" class="action-btn p-2 text-purple-600 hover:bg-purple-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'email'})">
+                            <i class="fas fa-paper-plane"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Facebook -->
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 610ms;" onclick="copyText(document.getElementById('userFacebook').textContent, 'Facebook')">
+                    <div class="w-10 h-10 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-lg mr-3">
+                        <i class="fab fa-facebook-f"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p data-lang="facebook-label" class="text-xs text-gray-400 uppercase font-semibold">Facebook</p>
+                        <p id="userFacebook" class="text-gray-800 font-medium">tranductien2006</p>
+                    </div>
+                    <div class="hidden group-hover:flex">
+                        <a href="" id="facebookLink" target="_blank" class="action-btn p-2 text-indigo-600 hover:bg-indigo-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'facebook'})">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Code -->
+            <div class="mt-6 px-6 text-center" data-animate="animate__fadeInUp" style="--animation-delay: 720ms;">
+                <button onclick="toggleQR()" class="text-sm text-gray-500 hover:text-blue-600 font-medium flex items-center justify-center mx-auto transition-colors">
+                    <i class="fas fa-qrcode mr-2"></i> <span data-lang="qr-btn">Hiện mã QR của tôi</span>
+                </button>
+                <div id="qr-container" class="hidden mt-4 p-4 bg-white border rounded-2xl shadow-inner">
+                    <div id="qrcode"></div>
+                    <p data-lang="qr-hint" class="text-xs text-gray-400 mt-2">Quét để lưu thông tin</p>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="mt-8 p-6 bg-gray-50 flex space-x-3" data-animate="animate__fadeInUp" style="--animation-delay: 800ms;">
+                <button onclick="downloadVCF()" class="vcard-button flex-1">
+                    <i class="fas fa-address-book mr-2"></i> <span data-lang="vcard-btn">Lưu vào danh bạ</span>
+                </button>
+                <button onclick="shareCard()" class="w-14 bg-white border border-gray-200 text-gray-700 hover:bg-gray-100 rounded-xl flex items-center justify-center transition-colors">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+
+            <!-- Contact Form Section -->
+            <div class="p-6 border-t border-gray-100" data-animate="animate__fadeInUp" style="--animation-delay: 880ms;">
+                <h3 class="text-lg font-bold text-gray-900 mb-2 flex items-center">
+                    <i class="fas fa-paper-plane mr-2 text-blue-600"></i> <span data-lang="form-title">Để lại thông tin</span>
+                </h3>
+                <p data-lang="form-desc" class="text-xs text-gray-500 mb-4">Gửi thông tin của bạn để chúng ta có thể kết nối.</p>
+                
+                <form id="lead-form" action="https://formspree.io/f/hierductien@gmail.com" method="POST">
+                    <label data-lang="label-name" class="form-label">Họ và tên *</label>
+                    <input type="text" name="name" required class="form-input" data-placeholder="ph-name" placeholder="Nguyễn Văn A">
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label data-lang="label-phone" class="form-label">Số điện thoại *</label>
+                            <input type="tel" name="phone" required class="form-input" data-placeholder="ph-phone" placeholder="090...">
+                        </div>
+                        <div>
+                            <label data-lang="label-email" class="form-label">Email *</label>
+                            <input type="email" name="email" required class="form-input" data-placeholder="ph-email" placeholder="abc@gmail.com">
+                        </div>
+                    </div>
+                    
+                    <label data-lang="label-company" class="form-label">Công ty (không bắt buộc)</label>
+                    <input type="text" name="company" class="form-input" data-placeholder="ph-company" placeholder="Tên công ty của bạn">
+                    
+                    <label data-lang="label-message" class="form-label">Lời nhắn</label>
+                    <textarea name="message" rows="3" class="form-input" data-placeholder="ph-message" placeholder="Bạn muốn nhắn gì cho mình không?"></textarea>
+                    
+                    <button type="submit" id="submit-button" class="submit-btn" data-lang="submit-btn">Gửi thông tin</button>
+                </form>
+                <div id="success-message" class="success-message">
+                    <i class="fas fa-check-circle mr-2"></i> <span data-lang="success-msg">Cảm ơn! Thông tin của bạn đã được gửi thành công.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="copy-toast">Đã sao chép!</div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAX6cmCWfXuK-OoCJ3aSrFsBd6t06sI-o4",
+            authDomain: "digital-business-card-2c74c.firebaseapp.com",
+            databaseURL: "https://digital-business-card-2c74c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "digital-business-card-2c74c",
+            storageBucket: "digital-business-card-2c74c.firebasestorage.app",
+            messagingSenderId: "191265792223",
+            appId: "1:191265792223:web:4e06d233088dc13cdf096a"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Multi-language translations
+        const translations = {
+            'vi': {
+                'sub-title': 'Digital Business Card',
+                'phone-label': 'Điện thoại',
+                'zalo-label': 'Zalo',
+                'email-label': 'Email',
+                'facebook-label': 'Facebook',
+                'qr-btn': 'Hiện mã QR của tôi',
+                'qr-hint': 'Quét để lưu thông tin',
+                'vcard-btn': 'Lưu vào danh bạ',
+                'form-title': 'Để lại thông tin',
+                'form-desc': 'Gửi thông tin của bạn để chúng ta có thể kết nối.',
+                'label-name': 'Họ và tên *',
+                'label-phone': 'Số điện thoại *',
+                'label-email': 'Email *',
+                'label-company': 'Công ty (không bắt buộc)',
+                'label-message': 'Lời nhắn',
+                'submit-btn': 'Gửi thông tin',
+                'success-msg': 'Cảm ơn! Thông tin của bạn đã được gửi thành công.',
+                'ph-name': 'Nguyễn Văn A',
+                'ph-phone': '090...',
+                'ph-email': 'abc@gmail.com',
+                'ph-company': 'Tên công ty của bạn',
+                'ph-message': 'Bạn muốn nhắn gì cho mình không?'
+            },
+            'en': {
+                'sub-title': 'Digital Business Card',
+                'phone-label': 'Phone',
+                'zalo-label': 'Zalo',
+                'email-label': 'Email',
+                'facebook-label': 'Facebook',
+                'qr-btn': 'Show my QR Code',
+                'qr-hint': 'Scan to save contact',
+                'vcard-btn': 'Add to Contacts',
+                'form-title': 'Leave your info',
+                'form-desc': 'Send your information so we can connect.',
+                'label-name': 'Full Name *',
+                'label-phone': 'Phone Number *',
+                'label-email': 'Email *',
+                'label-company': 'Company (Optional)',
+                'label-message': 'Message',
+                'submit-btn': 'Send Info',
+                'success-msg': 'Thank you! Your information has been sent successfully.',
+                'ph-name': 'John Doe',
+                'ph-phone': '090...',
+                'ph-email': 'abc@gmail.com',
+                'ph-company': 'Your company name',
+                'ph-message': 'Anything you want to tell me?'
+            }
+        };
+
+        const DARK_MODE_STORAGE_KEY = 'darkMode';
+        const systemDarkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+        function updateDarkModeToggle(isDark) {
+            const toggle = document.getElementById('themeToggle');
+            if (!toggle) return;
+            const label = isDark ? 'Chuyển sang giao diện sáng' : 'Bật giao diện tối';
+            toggle.setAttribute('aria-label', label);
+            toggle.setAttribute('title', label);
+            toggle.setAttribute('aria-pressed', String(isDark));
+        }
+
+        function applyDarkMode(isDark, persist = false) {
+            document.body.classList.toggle('dark-mode', isDark);
+            document.body.classList.add('theme-transition');
+            updateDarkModeToggle(isDark);
+            if (persist) localStorage.setItem(DARK_MODE_STORAGE_KEY, isDark ? 'dark' : 'light');
+        }
+
+        function getInitialDarkMode() {
+            const savedMode = localStorage.getItem(DARK_MODE_STORAGE_KEY);
+            if (savedMode === 'dark') return true;
+            if (savedMode === 'light') return false;
+            return systemDarkModeQuery.matches;
+        }
+
+        function toggleDarkMode() {
+            const nextMode = !document.body.classList.contains('dark-mode');
+            applyDarkMode(nextMode, true);
+            trackEvent('toggle_dark_mode', { mode: nextMode ? 'dark' : 'light', source: 'manual' });
+        }
+
+        const THEME_STORAGE_KEY = 'cardTheme';
+        const VALID_THEMES = ['professional', 'creative', 'ocean'];
+
+        function applyTheme(theme) {
+            const selectedTheme = VALID_THEMES.includes(theme) ? theme : 'professional';
+            document.body.classList.add('theme-transition');
+            document.body.classList.remove(...VALID_THEMES.map(name => `theme-${name}`));
+            if (selectedTheme !== 'professional') document.body.classList.add(`theme-${selectedTheme}`);
+            localStorage.setItem(THEME_STORAGE_KEY, selectedTheme);
+        }
+
+        let entranceAnimationPlayed = false;
+
+        function playEntranceAnimations() {
+            if (entranceAnimationPlayed) return;
+            entranceAnimationPlayed = true;
+            document.querySelectorAll('[data-animate]').forEach((element) => {
+                const animationName = element.dataset.animate;
+                // Đảm bảo animation luôn bắt đầu lại khi card vừa được mở.
+                element.classList.remove('animate__animated', animationName);
+                void element.offsetWidth;
+                element.classList.add('animate__animated', animationName);
+            });
+        }
+
+        function handleProfileImageLoad() {
+            const container = document.querySelector('.profile-img-container');
+            container.classList.remove('is-loading', 'image-error');
+            container.classList.add('image-loaded');
+            document.getElementById('profileIcon').style.display = 'none';
+        }
+
+        function handleProfileImageError() {
+            const container = document.querySelector('.profile-img-container');
+            container.classList.remove('is-loading', 'image-loaded');
+            container.classList.add('image-error');
+            document.getElementById('profileImg').style.display = 'none';
+            document.getElementById('profileIcon').style.display = 'block';
+        }
+
+        function setProfileImageUrl(imageUrl) {
+            const image = document.getElementById('profileImg');
+            const container = document.querySelector('.profile-img-container');
+            image.style.display = 'block';
+            container.classList.remove('image-loaded', 'image-error');
+            container.classList.add('is-loading');
+            if (imageUrl && /^https?:\/\//i.test(imageUrl)) {
+                image.src = imageUrl;
+            } else {
+                image.removeAttribute('src');
+                handleProfileImageError();
+            }
+        }
+
+        // Load data from Firebase
+        function loadUserData() {
+            database.ref('profile').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    applyTheme(data.theme || localStorage.getItem(THEME_STORAGE_KEY) || 'professional');
+                    // Update profile information
+                    document.getElementById('userName').textContent = data.name || 'Trần Đức Tiền';
+                    document.getElementById('userPhone').textContent = data.phone || '+84396558306';
+                    document.getElementById('userEmail').textContent = data.email || 'hierductien@gmail.com';
+                    document.getElementById('userZalo').textContent = data.zaloName || 'Trần Đức Tiền';
+                    document.getElementById('userFacebook').textContent = data.facebookUsername || 'tranductien2006';
+
+                    // Update links
+                    document.getElementById('callLink').href = `tel:${data.phone || '+84396558306'}`;
+                    document.getElementById('smsLink').href = `sms:${data.phone || '+84396558306'}`;
+                    document.getElementById('zaloLink').href = data.zaloLink || 'https://zalo.me/0396558306';
+                    document.getElementById('emailLink').href = `mailto:${data.email || 'hierductien@gmail.com'}`;
+                    document.getElementById('facebookLink').href = data.facebookLink || 'https://facebook.com/tranductien2006';
+
+                    // Update profile image from a normal cloud URL, never from an embedded Base64 string.
+                    setProfileImageUrl(data.profileImage || '');
+
+                    // Hide loading and show card
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('card-container').style.display = 'block';
+                    requestAnimationFrame(playEntranceAnimations);
+                }
+            });
+        }
+
+        // GA4 Event Tracking
+        function trackEvent(eventName, params = {}) {
+            if (typeof gtag === 'function') {
+                gtag('event', eventName, params);
+                console.log(`GA4 Event Tracked: ${eventName}`, params);
+            }
+        }
+
+        // Copy to clipboard
+        function copyText(text, label) {
+            trackEvent('copy_info', { 'item_label': label });
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.innerText = `Đã sao chép ${label}!`;
+                toast.style.opacity = '1';
+                toast.style.bottom = '30px';
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.bottom = '20px';
+                }, 2000);
+            });
+        }
+
+        // Download vCard
+        function downloadVCF() {
+            trackEvent('download_vcard', { 'contact_name': document.getElementById('userName').textContent });
+            const name = document.getElementById('userName').textContent;
+            const phone = document.getElementById('userPhone').textContent;
+            const email = document.getElementById('userEmail').textContent;
+            const title = "Digital Business Card";
+            const url = window.location.href;
+
+            const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL;TYPE=CELL:${phone}\nEMAIL:${email}\nTITLE:${title}\nURL:${url}\nEND:VCARD`;
+            
+            const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+            const urlObject = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = urlObject;
+            a.download = `${name.replace(/ /g, '_')}.vcf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(urlObject);
+        }
+
+        // Share card
+        function shareCard() {
+            const lang = localStorage.getItem('lang') || 'vi';
+            trackEvent('share_card', { 'method': navigator.share ? 'web_share_api' : 'clipboard' });
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Trần Đức Tiền - Digital Business Card',
+                    text: 'Lưu thông tin liên hệ của Trần Đức Tiền',
+                    url: window.location.href
+                });
+            } else {
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    const toast = document.getElementById('toast');
+                    toast.innerText = lang === 'vi' ? "Đã copy link trang web!" : "Website link copied!";
+                    toast.style.opacity = '1';
+                    setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+                });
+            }
+        }
+
+        // Toggle QR Code
+        let qrGenerated = false;
+        function toggleQR() {
+            const container = document.getElementById('qr-container');
+            container.classList.toggle('hidden');
+            
+            if (!qrGenerated) {
+                trackEvent('show_qr_code');
+                new QRCode(document.getElementById("qrcode"), {
+                    text: window.location.href.includes('http') ? window.location.href : "https://zalo.me/0396558306",
+                    width: 160,
+                    height: 160,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+                qrGenerated = true;
+            }
+        }
+
+        // Language management
+        function setLanguage(lang) {
+            localStorage.setItem('lang', lang);
+            document.getElementById('lang-vi').classList.toggle('active', lang === 'vi');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const key = el.getAttribute('data-lang');
+                if (translations[lang][key]) el.innerText = translations[lang][key];
+            });
+            
+            document.querySelectorAll('[data-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-placeholder');
+                if (translations[lang][key]) el.setAttribute('placeholder', translations[lang][key]);
+            });
+        }
+
+        // Form submission
+        const form = document.getElementById("lead-form");
+        const successMessage = document.getElementById("success-message");
+        const submitButton = document.getElementById("submit-button");
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const data = new FormData(event.target);
+            submitButton.disabled = true;
+            const currentLang = localStorage.getItem('lang') || 'vi';
+            submitButton.innerText = currentLang === 'vi' ? "Đang gửi..." : "Sending...";
+
+            fetch(event.target.action, {
+                method: form.method,
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            }).then(response => {
+                if (response.ok) {
+                    trackEvent('form_submission_success', { 'form_id': 'lead-form' });
+                    form.style.display = "none";
+                    successMessage.style.display = "block";
+                } else {
+                    response.json().then(data => {
+                        const errorMsg = currentLang === 'vi' ? "Có lỗi xảy ra, vui lòng thử lại sau." : "An error occurred, please try again later.";
+                        alert(errorMsg);
+                    })
+                }
+                submitButton.disabled = false;
+                submitButton.innerText = translations[currentLang]["submit-btn"];
+            }).catch(error => {
+                const connError = currentLang === 'vi' ? "Có lỗi kết nối, vui lòng kiểm tra lại mạng." : "Connection error, please check your network.";
+                alert(connError);
+                submitButton.disabled = false;
+                submitButton.innerText = translations[currentLang]["submit-btn"];
+            });
+        });
+
+        // Initialize
+        applyDarkMode(getInitialDarkMode());
+        document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
+        systemDarkModeQuery.addEventListener('change', (event) => {
+            if (!localStorage.getItem(DARK_MODE_STORAGE_KEY)) applyDarkMode(event.matches);
+        });
+        applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'professional');
+        const savedLang = localStorage.getItem('lang') || 'vi';
+        setLanguage(savedLang);
+        loadUserData();
+    </script>
+</body>
+</html>
