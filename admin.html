@@ -658,7 +658,7 @@
                 setUploadStatus('Bạn cần đăng nhập Admin trước khi tải ảnh.', true);
                 return;
             }
-            if (CLOUDINARY_CLOUD_NAME.includes('mctx3lwi') || CLOUDINARY_UPLOAD_PRESET.includes('digital-card-images')) {
+            if (CLOUDINARY_CLOUD_NAME.includes('YOUR_') || CLOUDINARY_UPLOAD_PRESET.includes('YOUR_')) {
                 setUploadStatus('Chưa cấu hình Cloudinary. Hãy điền CLOUD_NAME và UPLOAD_PRESET trong mã Admin.', true);
                 return;
             }
