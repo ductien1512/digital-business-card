@@ -20,12 +20,13 @@
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #f3f4f6 0%, #d1d5db 100%);
             min-height: 100vh;
+            padding-bottom: 24px;
         }
         *, *::before, *::after { box-sizing: border-box; }
         .container {
-            max-width: 600px;
+            width: min(100%, 640px);
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 16px;
         }
         .card {
             background: white;
@@ -33,6 +34,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             padding: 40px;
             margin-top: 40px;
+            width: 100%;
         }
         .form-group {
             margin-bottom: 20px;
@@ -168,26 +170,38 @@
             font-size: 14px;
         }
         .profile-preview {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding: 14px 16px;
             background: #f9fafb;
             border-radius: 12px;
         }
         .profile-preview img {
-            width: 100px;
-            height: 100px;
+            flex: 0 0 76px;
+            width: 76px;
+            height: 76px;
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 12px;
-            border: 4px solid white;
+            margin: 0;
+            border: 3px solid white;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        .profile-preview > i {
+            flex: 0 0 76px;
+            width: 76px;
+            text-align: center;
+        }
+        .preview-details { min-width: 0; text-align: left; }
         .profile-preview p {
             color: #6b7280;
             font-size: 14px;
-            margin-top: 8px;
+            margin: 3px 0 0;
+            overflow-wrap: anywhere;
         }
+        .profile-preview #previewName { color: #1f2937; font-size: 16px; font-weight: 700; margin-top: 0; }
+        .profile-preview #previewPhone { color: #9ca3af; font-size: 13px; }
         .tabs {
             display: flex;
             gap: 6px;
@@ -233,14 +247,16 @@
         /* Mobile layout: compact preview and one-row horizontally scrollable navigation. */
         @media (max-width: 640px) {
             body { overflow-x: hidden; }
-            .container { width: 100%; padding: 12px; }
-            .card { width: 100%; padding: 22px 16px; margin-top: 18px; }
+            .container { width: 100%; padding: 10px 10px 20px; }
+            .card { width: 100%; padding: 20px 14px; margin-top: 12px; border-radius: 14px; }
             .header { margin-bottom: 22px; }
             .header h1 { font-size: clamp(22px, 7vw, 28px); line-height: 1.25; }
-            .profile-preview { margin-bottom: 18px; padding: 13px 12px; }
-            .profile-preview img { width: 76px; height: 76px; margin-bottom: 6px; border-width: 3px; }
-            .profile-preview i { font-size: 38px !important; }
-            .profile-preview p { margin-top: 4px; font-size: 13px; }
+            .profile-preview { gap: 12px; margin-bottom: 18px; padding: 12px; }
+            .profile-preview img,
+            .profile-preview > i { flex-basis: 64px; width: 64px; height: 64px; }
+            .profile-preview > i { font-size: 34px !important; line-height: 64px; }
+            .profile-preview #previewName { font-size: 15px; }
+            .profile-preview #previewPhone { font-size: 12px; }
             .tabs { margin: 0 -4px 18px; padding: 0 4px 2px; }
             .tab-btn {
                 min-width: 92px;
@@ -256,6 +272,10 @@
             .form-group { margin-bottom: 16px; }
             .action-buttons { grid-template-columns: 1fr 108px; gap: 8px; margin-top: 18px; }
             .action-buttons .btn { padding: 11px 8px; font-size: 13px; }
+        }
+
+        @media (min-width: 641px) {
+            .action-buttons { position: sticky; bottom: 16px; z-index: 5; padding-top: 12px; background: rgba(255, 255, 255, .94); }
         }
 
     </style>
@@ -336,8 +356,10 @@
             <div class="profile-preview">
                 <img id="previewImg" src="" alt="Ảnh đại diện xem trước" loading="lazy" decoding="async" style="display: none;">
                 <i id="previewIcon" class="fas fa-user" style="font-size: 48px; color: #d1d5db;"></i>
-                <p id="previewName">Tên của bạn</p>
-                <p id="previewPhone" style="font-size: 12px; color: #9ca3af;"></p>
+                <div class="preview-details">
+                    <p id="previewName">Tên của bạn</p>
+                    <p id="previewPhone"></p>
+                </div>
             </div>
 
             <!-- Tabs -->
@@ -402,9 +424,6 @@
                 <div class="form-group">
                     <label class="form-label">URL Ảnh đại diện</label>
                     <input type="url" id="profileImage" class="form-input" placeholder="https://example.com/image.jpg">
-                    <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
-                        <i class="fas fa-info-circle mr-1"></i>Nhập đường dẫn URL của ảnh (JPG, PNG)
-                    </p>
                 </div>
 
                 <div class="form-group">
@@ -415,7 +434,7 @@
                     </label>
                     <input type="file" id="imageFile" class="file-input" accept="image/*" onchange="previewImage()">
                     <p id="uploadStatus" style="font-size: 12px; color: #6b7280; margin-top: 8px; line-height: 1.5;">
-                        <i class="fas fa-cloud-upload-alt mr-1"></i>Chọn ảnh để tải lên Cloudinary Free. Sau khi tải xong, bấm “Cập nhật thông tin” để lưu.
+                        <i class="fas fa-cloud-upload-alt mr-1"></i>Sẵn sàng tải ảnh
                     </p>
                 </div>
             </div>
