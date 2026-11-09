@@ -541,6 +541,22 @@
         body.dark-mode .contact-form-section .text-gray-500 { color: #b7c0ce !important; }
         body.dark-mode .contact-item { border-color: rgba(255, 255, 255, .08); }
         body.dark-mode .card { border-color: rgba(255, 255, 255, .08); box-shadow: 0 20px 54px rgba(0, 0, 0, .40); }
+
+        /* Restore the original, softer text palette */
+        body.dark-mode {
+            --text-color: #e5e7eb;
+            --muted-color: #a7b0c0;
+            --border-color: #374151;
+        }
+        body.dark-mode .contact-content p:first-child,
+        body.dark-mode .form-label { color: #9ca3af !important; }
+        body.dark-mode .contact-content p:last-child,
+        body.dark-mode .contact-form-section h3 { color: #e5e7eb !important; }
+        body.dark-mode .contact-form-section [data-lang="form-desc"] { color: #9ca3af !important; }
+        body.dark-mode .form-input::placeholder { color: #9ca3af !important; }
+        body.dark-mode .form-input { color: #e5e7eb; }
+        body.dark-mode .footer-actions .text-gray-700,
+        body.dark-mode .footer-actions .text-gray-500 { color: #d1d5db !important; }
         @media (max-width: 420px) {
             body { padding: 12px; align-items: flex-start; }
             .card { border-radius: 18px; }
