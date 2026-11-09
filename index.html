@@ -477,14 +477,27 @@
         .contact-actions {
             display: flex !important;
             align-items: center;
+            position: absolute;
+            top: 50%;
+            right: 10px;
             flex: 0 0 auto;
             gap: 4px;
-            margin-left: 10px;
-            opacity: .76;
-            transition: opacity .2s ease, transform .2s ease;
+            margin-left: 0;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translate(6px, -50%);
+            transition: opacity .2s ease, visibility .2s ease, transform .2s ease;
         }
         .contact-item:hover .contact-actions,
-        .contact-item:focus-within .contact-actions { opacity: 1; }
+        .contact-item:focus-within .contact-actions {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translate(0, -50%);
+        }
+        .contact-item:hover .contact-content,
+        .contact-item:focus-within .contact-content { padding-right: 78px; }
         .contact-action {
             display: inline-flex;
             align-items: center;
@@ -533,7 +546,7 @@
             .card { border-radius: 18px; }
             .contact-item { padding: 9px 10px; }
             .contact-icon { flex-basis: 36px; width: 36px; height: 36px; margin-right: 9px !important; }
-            .contact-actions { margin-left: 6px; gap: 2px; }
+            .contact-actions { right: 8px; gap: 2px; }
             .contact-action { flex-basis: 30px; width: 30px; height: 30px; font-size: 12px; }
             .contact-content p:last-child { font-size: 13px; }
             .contact-form-section { padding: 20px !important; }
@@ -679,7 +692,7 @@
                     <label data-lang="label-name" class="form-label">Họ và tên *</label>
                     <input type="text" name="name" required class="form-input" data-placeholder="ph-name" placeholder="Nguyễn Văn A">
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label data-lang="label-phone" class="form-label">Số điện thoại *</label>
                             <input type="tel" name="phone" required class="form-input" data-placeholder="ph-phone" placeholder="090...">
