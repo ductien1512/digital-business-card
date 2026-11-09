@@ -12,17 +12,17 @@
       gtag('js', new Date());
       gtag('config', 'G-541399676');
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="assets/tailwindcss.js"></script>
+    <link rel="stylesheet" href="assets/fontawesome.min.css">
+    <link rel="stylesheet" href="assets/inter.css">
     <!-- Animate.css: hiệu ứng xuất hiện nhẹ, tối ưu cho mobile -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="assets/animate.min.css">
+    <script src="assets/qrcode.min.js"></script>
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="assets/firebase-app-compat.js"></script>
+    <script src="assets/firebase-database-compat.js"></script>
+    <script src="assets/firebase-auth-compat.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         :root {
             --primary-color: #2563eb; --secondary-color: #7c3aed;
             --bg-color: #f3f4f6; --bg-color-end: #d1d5db;
@@ -608,7 +608,26 @@
             const hasPlaceholder = Object.values(firebaseConfig).some(value => String(value).includes('YOUR_'));
             element.innerHTML = `<strong>Không thể tải dữ liệu danh thiếp.</strong><br>${hasPlaceholder ? 'Bạn chưa thay Firebase Config mẫu bằng thông tin thật trong Firebase Console.' : message}<br><small>Kiểm tra lại Firebase Config, Realtime Database Rules và Console trình duyệt (F12).</small>`;
             element.style.display = 'block';
+            showOfflineCard();
+        }
+
+        // Keep the card usable when the local page is opened without internet.
+        function showOfflineCard() {
+            const defaults = {
+                phone: '+84396558306',
+                email: 'hierductien@gmail.com',
+                zalo: 'https://zalo.me/0396558306',
+                facebook: 'https://facebook.com/tranductien2006'
+            };
+            document.getElementById('callLink').href = `tel:${defaults.phone}`;
+            document.getElementById('smsLink').href = `sms:${defaults.phone}`;
+            document.getElementById('zaloLink').href = defaults.zalo;
+            document.getElementById('emailLink').href = `mailto:${defaults.email}`;
+            document.getElementById('facebookLink').href = defaults.facebook;
             document.getElementById('loading').style.display = 'none';
+            document.getElementById('card-container').style.display = 'block';
+            if (typeof setProfileImageUrl === 'function') setProfileImageUrl('');
+            if (typeof playEntranceAnimations === 'function') requestAnimationFrame(playEntranceAnimations);
         }
 
         // Multi-language translations
