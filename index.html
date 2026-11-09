@@ -408,164 +408,72 @@
             font-size: 18px;
             color: #666;
         }
-        /* Modern design-system refinements */
-        :root {
-            --radius-card: 20px;
-            --radius-control: 14px;
-            --shadow-card: 0 18px 50px rgba(15, 23, 42, .14), 0 2px 8px rgba(15, 23, 42, .06);
-            --surface-glass: rgba(255, 255, 255, .82);
-            --control-bg: rgba(255, 255, 255, .72);
-            --control-border: rgba(15, 23, 42, .10);
-        }
-        body.dark-mode {
-            --surface-glass: rgba(17, 24, 39, .82);
-            --control-bg: rgba(17, 24, 39, .76);
-            --control-border: rgba(255, 255, 255, .08);
-            --muted-color: #c1c9d6;
-        }
-        body {
-            background: radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--primary-color) 10%, transparent), transparent 34%),
-                        linear-gradient(135deg, var(--bg-color) 0%, var(--bg-color-end) 100%);
-        }
-        .card {
-            background: var(--surface-glass);
-            border: 1px solid rgba(255, 255, 255, .50);
-            border-radius: var(--radius-card);
-            box-shadow: var(--shadow-card);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-        .card:hover { transform: translateY(-2px); }
-        .header-bg {
-            background: linear-gradient(118deg,
-                color-mix(in srgb, var(--primary-color) 88%, #0f172a 12%),
-                color-mix(in srgb, var(--secondary-color) 82%, #334155 18%));
-        }
+        /* Final requested styling: preserve the original layout and interaction */
         .contact-item {
-            display: flex;
-            align-items: center;
-            min-width: 0;
-            gap: 0;
-            padding: 10px 12px;
-            margin-bottom: 8px;
-            background: var(--soft-surface-color) !important;
-            border: 1px solid transparent;
-            border-radius: 16px;
-            transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
-        }
-        .contact-item:hover {
-            transform: translateY(-1px);
-            border-color: color-mix(in srgb, var(--primary-color) 18%, transparent);
-            box-shadow: 0 8px 18px rgba(15, 23, 42, .08);
-            background: color-mix(in srgb, var(--accent-soft) 62%, var(--soft-surface-color)) !important;
-        }
-        .contact-icon {
-            flex: 0 0 40px;
-            width: 40px;
-            height: 40px;
-            margin-right: 12px !important;
-            border-radius: 12px !important;
-        }
-        .contact-content {
-            flex: 1 1 auto;
+            position: relative;
             min-width: 0;
             overflow: hidden;
         }
-        .contact-content p { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .contact-content p:first-child { color: var(--muted-color) !important; letter-spacing: .08em; }
-        .contact-content p:last-child { color: var(--text-color) !important; }
+        .contact-content {
+            min-width: 0;
+            flex: 1 1 auto;
+            overflow: hidden;
+            padding-right: 78px;
+        }
+        .contact-content p {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .contact-actions {
-            display: flex !important;
-            align-items: center;
             position: absolute;
             top: 50%;
             right: 10px;
-            flex: 0 0 auto;
+            z-index: 2;
+            display: flex !important;
+            align-items: center;
             gap: 4px;
-            margin-left: 0;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transform: translate(6px, -50%);
+            transform: translate(8px, -50%);
             transition: opacity .2s ease, visibility .2s ease, transform .2s ease;
         }
         .contact-item:hover .contact-actions,
-        .contact-item:focus-within .contact-actions {
+        .contact-item:focus-within .contact-actions,
+        .contact-item.actions-visible .contact-actions {
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
             transform: translate(0, -50%);
         }
-        .contact-item:hover .contact-content,
-        .contact-item:focus-within .contact-content { padding-right: 78px; }
         .contact-action {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            flex: 0 0 34px;
             width: 34px;
             height: 34px;
             padding: 0 !important;
-            border-radius: 10px !important;
-            transition: background-color .2s ease, color .2s ease, transform .2s ease;
+            border-radius: 999px !important;
         }
-        .contact-action:hover { transform: translateY(-1px); }
-        .footer-actions {
-            background: color-mix(in srgb, var(--soft-surface-color) 82%, transparent) !important;
-            border-top: 1px solid var(--control-border);
-        }
-        .vcard-button, .submit-btn {
-            background: linear-gradient(118deg,
-                color-mix(in srgb, var(--primary-color) 88%, #0f172a 12%),
-                color-mix(in srgb, var(--secondary-color) 84%, #334155 16%));
-            box-shadow: 0 8px 18px color-mix(in srgb, var(--primary-color) 20%, transparent);
-        }
-        .vcard-button:hover, .submit-btn:hover { opacity: 1; transform: translateY(-1px); filter: brightness(1.04); }
-        .vcard-button:active, .submit-btn:active { transform: translateY(0); filter: brightness(.98); }
-        .form-input {
-            padding: 12px 16px;
-            min-height: 44px;
-            background: var(--control-bg);
-            color: var(--text-color);
-            border: 1px solid var(--control-border);
-            border-radius: var(--radius-control);
-        }
-        .form-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-color) 16%, transparent); }
-        .form-input::placeholder { color: #6b7280; opacity: 1; }
-        .form-label { color: #4b5563; margin-top: 14px; margin-bottom: 6px; }
-        body.dark-mode .form-label,
-        body.dark-mode .contact-form-section [data-lang^="label-"] { color: #d1d5db !important; }
-        body.dark-mode .form-input { background: var(--control-bg); color: #f3f4f6; border-color: rgba(255, 255, 255, .08); }
-        body.dark-mode .form-input::placeholder { color: #c1c9d6; }
-        body.dark-mode .contact-form-section [data-lang="form-desc"],
-        body.dark-mode .contact-form-section .text-gray-500 { color: #b7c0ce !important; }
-        body.dark-mode .contact-item { border-color: rgba(255, 255, 255, .08); }
-        body.dark-mode .card { border-color: rgba(255, 255, 255, .08); box-shadow: 0 20px 54px rgba(0, 0, 0, .40); }
+        .contact-action:hover { transform: scale(1.05); }
 
-        /* Restore the original, softer text palette */
-        body.dark-mode {
-            --text-color: #e5e7eb;
-            --muted-color: #a7b0c0;
-            --border-color: #374151;
-        }
+        /* Requested two-color text palette for Dark Mode */
         body.dark-mode .contact-content p:first-child,
-        body.dark-mode .form-label { color: #9ca3af !important; }
+        body.dark-mode .form-label,
+        body.dark-mode .form-input::placeholder,
+        body.dark-mode .contact-form-section [data-lang="form-desc"] {
+            color: #9ca3af !important;
+        }
         body.dark-mode .contact-content p:last-child,
-        body.dark-mode .contact-form-section h3 { color: #e5e7eb !important; }
-        body.dark-mode .contact-form-section [data-lang="form-desc"] { color: #9ca3af !important; }
-        body.dark-mode .form-input::placeholder { color: #9ca3af !important; }
-        body.dark-mode .form-input { color: #e5e7eb; }
-        body.dark-mode .footer-actions .text-gray-700,
-        body.dark-mode .footer-actions .text-gray-500 { color: #d1d5db !important; }
+        body.dark-mode .contact-form-section h3,
+        body.dark-mode .form-input {
+            color: #e5e7eb !important;
+        }
         @media (max-width: 420px) {
-            body { padding: 12px; align-items: flex-start; }
-            .card { border-radius: 18px; }
-            .contact-item { padding: 9px 10px; }
-            .contact-icon { flex-basis: 36px; width: 36px; height: 36px; margin-right: 9px !important; }
+            .contact-content { padding-right: 70px; }
             .contact-actions { right: 8px; gap: 2px; }
-            .contact-action { flex-basis: 30px; width: 30px; height: 30px; font-size: 12px; }
-            .contact-content p:last-child { font-size: 13px; }
-            .contact-form-section { padding: 20px !important; }
+            .contact-action { width: 30px; height: 30px; font-size: 12px; }
         }
     </style>
 </head>
@@ -609,7 +517,7 @@
             <!-- Contact Items -->
             <div class="px-6 space-y-3">
                 <!-- Phone -->
-                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 340ms;" onclick="copyText(document.getElementById('userPhone').textContent, 'Số điện thoại')">
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 340ms;" onclick="toggleContactActions(this, event); copyText(document.getElementById('userPhone').textContent, 'Số điện thoại')">
                     <div class="contact-icon w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg mr-3">
                         <i class="fas fa-phone"></i>
                     </div>
@@ -628,7 +536,7 @@
                 </div>
 
                 <!-- Zalo -->
-                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 430ms;" onclick="copyText(document.getElementById('userZalo').textContent, 'Zalo')">
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 430ms;" onclick="toggleContactActions(this, event); copyText(document.getElementById('userZalo').textContent, 'Zalo')">
                     <div class="contact-icon w-10 h-10 flex items-center justify-center bg-sky-100 text-sky-600 rounded-lg mr-3">
                         <i class="fas fa-comment-dots"></i>
                     </div>
@@ -644,7 +552,7 @@
                 </div>
 
                 <!-- Email -->
-                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 520ms;" onclick="copyText(document.getElementById('userEmail').textContent, 'Email')">
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 520ms;" onclick="toggleContactActions(this, event); copyText(document.getElementById('userEmail').textContent, 'Email')">
                     <div class="contact-icon w-10 h-10 flex items-center justify-center bg-purple-100 text-purple-600 rounded-lg mr-3">
                         <i class="fas fa-envelope"></i>
                     </div>
@@ -660,7 +568,7 @@
                 </div>
 
                 <!-- Facebook -->
-                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 610ms;" onclick="copyText(document.getElementById('userFacebook').textContent, 'Facebook')">
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 610ms;" onclick="toggleContactActions(this, event); copyText(document.getElementById('userFacebook').textContent, 'Facebook')">
                     <div class="contact-icon w-10 h-10 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-lg mr-3">
                         <i class="fab fa-facebook-f"></i>
                     </div>
@@ -1026,6 +934,15 @@
                     setTimeout(() => { toast.style.opacity = '0'; }, 2000);
                 });
             }
+        }
+
+        // Reveal actions for the contact row without changing its layout width.
+        function toggleContactActions(item, event) {
+            if (event && event.target && event.target.closest('a')) return;
+            document.querySelectorAll('.contact-item.actions-visible').forEach((row) => {
+                if (row !== item) row.classList.remove('actions-visible');
+            });
+            item.classList.toggle('actions-visible');
         }
 
         // Toggle QR Code
