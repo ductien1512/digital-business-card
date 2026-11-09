@@ -408,72 +408,71 @@
             font-size: 18px;
             color: #666;
         }
-        /* Final requested styling: preserve the original layout and interaction */
-        .contact-item {
-            position: relative;
+        /* Requested text and overflow safeguards only */
+        .contact-item > div:nth-child(2) {
             min-width: 0;
             overflow: hidden;
         }
-        .contact-content {
-            min-width: 0;
-            flex: 1 1 auto;
-            overflow: hidden;
-            padding-right: 78px;
-        }
-        .contact-content p {
+        .contact-item > div:nth-child(2) p {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .contact-actions {
+        /* Contact actions: fixed overlay on the right, without changing row layout */
+        .contact-item {
+            position: relative;
+            overflow: hidden;
+        }
+        .contact-item > div:nth-child(2) {
+            padding-right: 78px;
+        }
+        .contact-item > div:last-child {
             position: absolute;
+            right: 12px;
             top: 50%;
-            right: 10px;
-            z-index: 2;
+            z-index: 3;
             display: flex !important;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
+            padding: 6px 0 6px 16px;
+            background: linear-gradient(to left, var(--soft-surface-color) 70%, transparent);
+            border-radius: 10px;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
-            transform: translate(8px, -50%);
-            transition: opacity .2s ease, visibility .2s ease, transform .2s ease;
+            transform: translateY(-50%);
+            transition: opacity .25s ease, visibility .25s ease;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
-        .contact-item:hover .contact-actions,
-        .contact-item:focus-within .contact-actions,
-        .contact-item.actions-visible .contact-actions {
+        .contact-item:hover > div:last-child,
+        .contact-item:focus-within > div:last-child,
+        .contact-item:active > div:last-child {
             opacity: 1;
             visibility: visible;
             pointer-events: auto;
-            transform: translate(0, -50%);
         }
-        .contact-action {
+        .contact-item > div:last-child a {
+            position: relative;
+            z-index: 1;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 34px;
-            height: 34px;
-            padding: 0 !important;
-            border-radius: 999px !important;
         }
-        .contact-action:hover { transform: scale(1.05); }
-
-        /* Requested two-color text palette for Dark Mode */
-        body.dark-mode .contact-content p:first-child,
+        @media (max-width: 420px) {
+            .contact-item > div:nth-child(2) { padding-right: 70px; }
+            .contact-item > div:last-child { right: 8px; gap: 4px; padding-left: 12px; }
+        }
+        body.dark-mode .contact-item > div:nth-child(2) p:first-child,
         body.dark-mode .form-label,
         body.dark-mode .form-input::placeholder,
         body.dark-mode .contact-form-section [data-lang="form-desc"] {
             color: #9ca3af !important;
         }
-        body.dark-mode .contact-content p:last-child,
+        body.dark-mode .contact-item > div:nth-child(2) p:last-child,
         body.dark-mode .contact-form-section h3,
         body.dark-mode .form-input {
             color: #e5e7eb !important;
-        }
-        @media (max-width: 420px) {
-            .contact-content { padding-right: 70px; }
-            .contact-actions { right: 8px; gap: 2px; }
-            .contact-action { width: 30px; height: 30px; font-size: 12px; }
         }
     </style>
 </head>
@@ -517,67 +516,67 @@
             <!-- Contact Items -->
             <div class="px-6 space-y-3">
                 <!-- Phone -->
-                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 340ms;" onclick="toggleContactActions(this, event); copyText(document.getElementById('userPhone').textContent, 'Số điện thoại')">
-                    <div class="contact-icon w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg mr-3">
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 340ms;" onclick="copyText(document.getElementById('userPhone').textContent, 'Số điện thoại')">
+                    <div class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg mr-3">
                         <i class="fas fa-phone"></i>
                     </div>
-                    <div class="contact-content flex-1">
+                    <div class="flex-1">
                         <p data-lang="phone-label" class="text-xs text-gray-400 uppercase font-semibold">Điện thoại</p>
                         <p id="userPhone" class="text-gray-800 font-medium">+84396558306</p>
                     </div>
-                    <div class="contact-actions space-x-2">
-                        <a href="" id="callLink" class="contact-action action-btn p-2 text-blue-600 hover:bg-blue-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'phone'})">
+                    <div class="hidden group-hover:flex space-x-2">
+                        <a href="" id="callLink" class="action-btn p-2 text-blue-600 hover:bg-blue-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'phone'})">
                             <i class="fas fa-phone-alt"></i>
                         </a>
-                        <a href="" id="smsLink" class="contact-action action-btn p-2 text-green-600 hover:bg-green-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'sms'})">
+                        <a href="" id="smsLink" class="action-btn p-2 text-green-600 hover:bg-green-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'sms'})">
                             <i class="fas fa-comment"></i>
                         </a>
                     </div>
                 </div>
 
                 <!-- Zalo -->
-                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 430ms;" onclick="toggleContactActions(this, event); copyText(document.getElementById('userZalo').textContent, 'Zalo')">
-                    <div class="contact-icon w-10 h-10 flex items-center justify-center bg-sky-100 text-sky-600 rounded-lg mr-3">
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 430ms;" onclick="copyText(document.getElementById('userZalo').textContent, 'Zalo')">
+                    <div class="w-10 h-10 flex items-center justify-center bg-sky-100 text-sky-600 rounded-lg mr-3">
                         <i class="fas fa-comment-dots"></i>
                     </div>
-                    <div class="contact-content flex-1">
+                    <div class="flex-1">
                         <p data-lang="zalo-label" class="text-xs text-gray-400 uppercase font-semibold">Zalo</p>
                         <p id="userZalo" class="text-gray-800 font-medium">Trần Đức Tiền</p>
                     </div>
-                    <div class="contact-actions">
-                        <a href="" id="zaloLink" target="_blank" class="contact-action action-btn p-2 text-sky-600 hover:bg-sky-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'zalo'})">
+                    <div class="hidden group-hover:flex">
+                        <a href="" id="zaloLink" target="_blank" class="action-btn p-2 text-sky-600 hover:bg-sky-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'zalo'})">
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
                 </div>
 
                 <!-- Email -->
-                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 520ms;" onclick="toggleContactActions(this, event); copyText(document.getElementById('userEmail').textContent, 'Email')">
-                    <div class="contact-icon w-10 h-10 flex items-center justify-center bg-purple-100 text-purple-600 rounded-lg mr-3">
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 520ms;" onclick="copyText(document.getElementById('userEmail').textContent, 'Email')">
+                    <div class="w-10 h-10 flex items-center justify-center bg-purple-100 text-purple-600 rounded-lg mr-3">
                         <i class="fas fa-envelope"></i>
                     </div>
-                    <div class="contact-content flex-1">
+                    <div class="flex-1">
                         <p data-lang="email-label" class="text-xs text-gray-400 uppercase font-semibold">Email</p>
                         <p id="userEmail" class="text-gray-800 font-medium">hierductien@gmail.com</p>
                     </div>
-                    <div class="contact-actions">
-                        <a href="" id="emailLink" class="contact-action action-btn p-2 text-purple-600 hover:bg-purple-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'email'})">
+                    <div class="hidden group-hover:flex">
+                        <a href="" id="emailLink" class="action-btn p-2 text-purple-600 hover:bg-purple-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'email'})">
                             <i class="fas fa-paper-plane"></i>
                         </a>
                     </div>
                 </div>
 
                 <!-- Facebook -->
-                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 610ms;" onclick="toggleContactActions(this, event); copyText(document.getElementById('userFacebook').textContent, 'Facebook')">
-                    <div class="contact-icon w-10 h-10 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-lg mr-3">
+                <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 610ms;" onclick="copyText(document.getElementById('userFacebook').textContent, 'Facebook')">
+                    <div class="w-10 h-10 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-lg mr-3">
                         <i class="fab fa-facebook-f"></i>
                     </div>
-                    <div class="contact-content flex-1">
+                    <div class="flex-1">
                         <p data-lang="facebook-label" class="text-xs text-gray-400 uppercase font-semibold">Facebook</p>
                         <p id="userFacebook" class="text-gray-800 font-medium">tranductien2006</p>
                     </div>
-                    <div class="contact-actions">
-                        <a href="" id="facebookLink" target="_blank" class="contact-action action-btn p-2 text-indigo-600 hover:bg-indigo-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'facebook'})">
+                    <div class="hidden group-hover:flex">
+                        <a href="" id="facebookLink" target="_blank" class="action-btn p-2 text-indigo-600 hover:bg-indigo-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'facebook'})">
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
@@ -934,15 +933,6 @@
                     setTimeout(() => { toast.style.opacity = '0'; }, 2000);
                 });
             }
-        }
-
-        // Reveal actions for the contact row without changing its layout width.
-        function toggleContactActions(item, event) {
-            if (event && event.target && event.target.closest('a')) return;
-            document.querySelectorAll('.contact-item.actions-visible').forEach((row) => {
-                if (row !== item) row.classList.remove('actions-visible');
-            });
-            item.classList.toggle('actions-visible');
         }
 
         // Toggle QR Code
