@@ -561,6 +561,32 @@
             .contact-form-section .form-input { min-height: 64px; }
             .contact-form-section textarea.form-input { min-height: 150px; }
         }
+        /* Restore the original Leave your info form proportions/layout. */
+        .contact-form-section h3 {
+            font-size: 1.125rem;
+            line-height: 1.5;
+            margin-bottom: .5rem !important;
+        }
+        .contact-form-section > p {
+            font-size: .75rem;
+            line-height: 1.5;
+        }
+        .contact-form-section .form-input {
+            min-height: 0;
+            padding: 10px 14px;
+            border-radius: 10px;
+        }
+        .contact-form-section textarea.form-input { min-height: 0; }
+        .contact-form-section .submit-btn {
+            min-height: 0;
+            margin-top: 20px;
+            padding: 12px;
+            font-size: inherit;
+            border-radius: 12px;
+        }
+        @media (max-width: 420px) {
+            .contact-form-section { padding: 24px !important; }
+        }
     </style>
 </head>
 <body>
