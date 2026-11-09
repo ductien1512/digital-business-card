@@ -408,6 +408,136 @@
             font-size: 18px;
             color: #666;
         }
+        /* Modern design-system refinements */
+        :root {
+            --radius-card: 20px;
+            --radius-control: 14px;
+            --shadow-card: 0 18px 50px rgba(15, 23, 42, .14), 0 2px 8px rgba(15, 23, 42, .06);
+            --surface-glass: rgba(255, 255, 255, .82);
+            --control-bg: rgba(255, 255, 255, .72);
+            --control-border: rgba(15, 23, 42, .10);
+        }
+        body.dark-mode {
+            --surface-glass: rgba(17, 24, 39, .82);
+            --control-bg: rgba(17, 24, 39, .76);
+            --control-border: rgba(255, 255, 255, .08);
+            --muted-color: #c1c9d6;
+        }
+        body {
+            background: radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--primary-color) 10%, transparent), transparent 34%),
+                        linear-gradient(135deg, var(--bg-color) 0%, var(--bg-color-end) 100%);
+        }
+        .card {
+            background: var(--surface-glass);
+            border: 1px solid rgba(255, 255, 255, .50);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .card:hover { transform: translateY(-2px); }
+        .header-bg {
+            background: linear-gradient(118deg,
+                color-mix(in srgb, var(--primary-color) 88%, #0f172a 12%),
+                color-mix(in srgb, var(--secondary-color) 82%, #334155 18%));
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            gap: 0;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: var(--soft-surface-color) !important;
+            border: 1px solid transparent;
+            border-radius: 16px;
+            transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+        }
+        .contact-item:hover {
+            transform: translateY(-1px);
+            border-color: color-mix(in srgb, var(--primary-color) 18%, transparent);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, .08);
+            background: color-mix(in srgb, var(--accent-soft) 62%, var(--soft-surface-color)) !important;
+        }
+        .contact-icon {
+            flex: 0 0 40px;
+            width: 40px;
+            height: 40px;
+            margin-right: 12px !important;
+            border-radius: 12px !important;
+        }
+        .contact-content {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: hidden;
+        }
+        .contact-content p { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .contact-content p:first-child { color: var(--muted-color) !important; letter-spacing: .08em; }
+        .contact-content p:last-child { color: var(--text-color) !important; }
+        .contact-actions {
+            display: flex !important;
+            align-items: center;
+            flex: 0 0 auto;
+            gap: 4px;
+            margin-left: 10px;
+            opacity: .76;
+            transition: opacity .2s ease, transform .2s ease;
+        }
+        .contact-item:hover .contact-actions,
+        .contact-item:focus-within .contact-actions { opacity: 1; }
+        .contact-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 34px;
+            width: 34px;
+            height: 34px;
+            padding: 0 !important;
+            border-radius: 10px !important;
+            transition: background-color .2s ease, color .2s ease, transform .2s ease;
+        }
+        .contact-action:hover { transform: translateY(-1px); }
+        .footer-actions {
+            background: color-mix(in srgb, var(--soft-surface-color) 82%, transparent) !important;
+            border-top: 1px solid var(--control-border);
+        }
+        .vcard-button, .submit-btn {
+            background: linear-gradient(118deg,
+                color-mix(in srgb, var(--primary-color) 88%, #0f172a 12%),
+                color-mix(in srgb, var(--secondary-color) 84%, #334155 16%));
+            box-shadow: 0 8px 18px color-mix(in srgb, var(--primary-color) 20%, transparent);
+        }
+        .vcard-button:hover, .submit-btn:hover { opacity: 1; transform: translateY(-1px); filter: brightness(1.04); }
+        .vcard-button:active, .submit-btn:active { transform: translateY(0); filter: brightness(.98); }
+        .form-input {
+            padding: 12px 16px;
+            min-height: 44px;
+            background: var(--control-bg);
+            color: var(--text-color);
+            border: 1px solid var(--control-border);
+            border-radius: var(--radius-control);
+        }
+        .form-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-color) 16%, transparent); }
+        .form-input::placeholder { color: #6b7280; opacity: 1; }
+        .form-label { color: #4b5563; margin-top: 14px; margin-bottom: 6px; }
+        body.dark-mode .form-label,
+        body.dark-mode .contact-form-section [data-lang^="label-"] { color: #d1d5db !important; }
+        body.dark-mode .form-input { background: var(--control-bg); color: #f3f4f6; border-color: rgba(255, 255, 255, .08); }
+        body.dark-mode .form-input::placeholder { color: #c1c9d6; }
+        body.dark-mode .contact-form-section [data-lang="form-desc"],
+        body.dark-mode .contact-form-section .text-gray-500 { color: #b7c0ce !important; }
+        body.dark-mode .contact-item { border-color: rgba(255, 255, 255, .08); }
+        body.dark-mode .card { border-color: rgba(255, 255, 255, .08); box-shadow: 0 20px 54px rgba(0, 0, 0, .40); }
+        @media (max-width: 420px) {
+            body { padding: 12px; align-items: flex-start; }
+            .card { border-radius: 18px; }
+            .contact-item { padding: 9px 10px; }
+            .contact-icon { flex-basis: 36px; width: 36px; height: 36px; margin-right: 9px !important; }
+            .contact-actions { margin-left: 6px; gap: 2px; }
+            .contact-action { flex-basis: 30px; width: 30px; height: 30px; font-size: 12px; }
+            .contact-content p:last-child { font-size: 13px; }
+            .contact-form-section { padding: 20px !important; }
+        }
     </style>
 </head>
 <body>
@@ -451,18 +581,18 @@
             <div class="px-6 space-y-3">
                 <!-- Phone -->
                 <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 340ms;" onclick="copyText(document.getElementById('userPhone').textContent, 'Số điện thoại')">
-                    <div class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg mr-3">
+                    <div class="contact-icon w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded-lg mr-3">
                         <i class="fas fa-phone"></i>
                     </div>
-                    <div class="flex-1">
+                    <div class="contact-content flex-1">
                         <p data-lang="phone-label" class="text-xs text-gray-400 uppercase font-semibold">Điện thoại</p>
                         <p id="userPhone" class="text-gray-800 font-medium">+84396558306</p>
                     </div>
-                    <div class="hidden group-hover:flex space-x-2">
-                        <a href="" id="callLink" class="action-btn p-2 text-blue-600 hover:bg-blue-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'phone'})">
+                    <div class="contact-actions space-x-2">
+                        <a href="" id="callLink" class="contact-action action-btn p-2 text-blue-600 hover:bg-blue-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'phone'})">
                             <i class="fas fa-phone-alt"></i>
                         </a>
-                        <a href="" id="smsLink" class="action-btn p-2 text-green-600 hover:bg-green-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'sms'})">
+                        <a href="" id="smsLink" class="contact-action action-btn p-2 text-green-600 hover:bg-green-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'sms'})">
                             <i class="fas fa-comment"></i>
                         </a>
                     </div>
@@ -470,15 +600,15 @@
 
                 <!-- Zalo -->
                 <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 430ms;" onclick="copyText(document.getElementById('userZalo').textContent, 'Zalo')">
-                    <div class="w-10 h-10 flex items-center justify-center bg-sky-100 text-sky-600 rounded-lg mr-3">
+                    <div class="contact-icon w-10 h-10 flex items-center justify-center bg-sky-100 text-sky-600 rounded-lg mr-3">
                         <i class="fas fa-comment-dots"></i>
                     </div>
-                    <div class="flex-1">
+                    <div class="contact-content flex-1">
                         <p data-lang="zalo-label" class="text-xs text-gray-400 uppercase font-semibold">Zalo</p>
                         <p id="userZalo" class="text-gray-800 font-medium">Trần Đức Tiền</p>
                     </div>
-                    <div class="hidden group-hover:flex">
-                        <a href="" id="zaloLink" target="_blank" class="action-btn p-2 text-sky-600 hover:bg-sky-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'zalo'})">
+                    <div class="contact-actions">
+                        <a href="" id="zaloLink" target="_blank" class="contact-action action-btn p-2 text-sky-600 hover:bg-sky-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'zalo'})">
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
@@ -486,15 +616,15 @@
 
                 <!-- Email -->
                 <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 520ms;" onclick="copyText(document.getElementById('userEmail').textContent, 'Email')">
-                    <div class="w-10 h-10 flex items-center justify-center bg-purple-100 text-purple-600 rounded-lg mr-3">
+                    <div class="contact-icon w-10 h-10 flex items-center justify-center bg-purple-100 text-purple-600 rounded-lg mr-3">
                         <i class="fas fa-envelope"></i>
                     </div>
-                    <div class="flex-1">
+                    <div class="contact-content flex-1">
                         <p data-lang="email-label" class="text-xs text-gray-400 uppercase font-semibold">Email</p>
                         <p id="userEmail" class="text-gray-800 font-medium">hierductien@gmail.com</p>
                     </div>
-                    <div class="hidden group-hover:flex">
-                        <a href="" id="emailLink" class="action-btn p-2 text-purple-600 hover:bg-purple-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'email'})">
+                    <div class="contact-actions">
+                        <a href="" id="emailLink" class="contact-action action-btn p-2 text-purple-600 hover:bg-purple-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'email'})">
                             <i class="fas fa-paper-plane"></i>
                         </a>
                     </div>
@@ -502,15 +632,15 @@
 
                 <!-- Facebook -->
                 <div class="group relative flex items-center p-3 contact-item" data-animate="animate__fadeInLeft" style="--animation-delay: 610ms;" onclick="copyText(document.getElementById('userFacebook').textContent, 'Facebook')">
-                    <div class="w-10 h-10 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-lg mr-3">
+                    <div class="contact-icon w-10 h-10 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-lg mr-3">
                         <i class="fab fa-facebook-f"></i>
                     </div>
-                    <div class="flex-1">
+                    <div class="contact-content flex-1">
                         <p data-lang="facebook-label" class="text-xs text-gray-400 uppercase font-semibold">Facebook</p>
                         <p id="userFacebook" class="text-gray-800 font-medium">tranductien2006</p>
                     </div>
-                    <div class="hidden group-hover:flex">
-                        <a href="" id="facebookLink" target="_blank" class="action-btn p-2 text-indigo-600 hover:bg-indigo-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'facebook'})">
+                    <div class="contact-actions">
+                        <a href="" id="facebookLink" target="_blank" class="contact-action action-btn p-2 text-indigo-600 hover:bg-indigo-200 rounded-full" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'facebook'})">
                             <i class="fas fa-external-link-alt"></i>
                         </a>
                     </div>
@@ -529,7 +659,7 @@
             </div>
 
             <!-- Footer Actions -->
-            <div class="mt-8 p-6 bg-gray-50 flex space-x-3" data-animate="animate__fadeInUp" style="--animation-delay: 800ms;">
+            <div class="footer-actions mt-8 p-6 bg-gray-50 flex space-x-3" data-animate="animate__fadeInUp" style="--animation-delay: 800ms;">
                 <button onclick="downloadVCF()" class="vcard-button flex-1">
                     <i class="fas fa-address-book mr-2"></i> <span data-lang="vcard-btn">Lưu vào danh bạ</span>
                 </button>
@@ -539,7 +669,7 @@
             </div>
 
             <!-- Contact Form Section -->
-            <div class="p-6 border-t border-gray-100" data-animate="animate__fadeInUp" style="--animation-delay: 880ms;">
+            <div class="contact-form-section p-6 border-t border-gray-100" data-animate="animate__fadeInUp" style="--animation-delay: 880ms;">
                 <h3 class="text-lg font-bold text-gray-900 mb-2 flex items-center">
                     <i class="fas fa-paper-plane mr-2 text-blue-600"></i> <span data-lang="form-title">Để lại thông tin</span>
                 </h3>
@@ -549,7 +679,7 @@
                     <label data-lang="label-name" class="form-label">Họ và tên *</label>
                     <input type="text" name="name" required class="form-input" data-placeholder="ph-name" placeholder="Nguyễn Văn A">
                     
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label data-lang="label-phone" class="form-label">Số điện thoại *</label>
                             <input type="tel" name="phone" required class="form-input" data-placeholder="ph-phone" placeholder="090...">
