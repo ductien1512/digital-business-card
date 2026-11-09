@@ -528,11 +528,16 @@
         if (auth) auth.onAuthStateChanged((user) => {
             if (user) {
                 // User is logged in
-                document.getElementById('authForm').style.display = 'none';
-                document.getElementById('signupForm').style.display = 'none';
-                document.getElementById('adminPanel').style.display = 'block';
-                document.getElementById('userEmail').textContent = user.email;
-                loadProfileData();
+                if (user.email === 'hierductien@gmail.com') {
+                    document.getElementById('authForm').style.display = 'none';           
+                    document.getElementById('signupForm').style.display = 'none';          
+                    document.getElementById('adminPanel').style.display = 'block';
+                    document.getElementById('userEmail').textContent = user.email;
+            loadProfileData();
+                } else {
+                    auth.signOut();
+                    alert('Bạn không có quyền truy cập trang quản trị này!');
+                }
             } else {
                 // User is logged out
                 document.getElementById('authForm').style.display = 'block';
