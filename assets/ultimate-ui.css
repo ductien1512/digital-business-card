@@ -1,0 +1,284 @@
+/* ==========================================================================
+   ultimate-ui-3in1  —  Neo-Glass & Border Glow
+                      + Floating Label & Underline Sleek
+                      + Liquid Gradient & Soft Shadow
+   Tiền tố class: ui-   |   Đổi màu chủ đạo chỉ cần sửa --ui-glow-rgb
+   ========================================================================== */
+
+@property --ui-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* 1. TOKENS ---------------------------------------------------------------- */
+:root {
+  --ui-glow-rgb: 56 189 248;          /* Sky Blue — xem preset trong SKILL.md */
+  --ui-glow-deep-rgb: 14 116 144;     /* tông đậm đi kèm, dùng cho nút */
+  --ui-glow: rgb(var(--ui-glow-rgb));
+
+  --ui-bg-1: #0f172a;
+  --ui-bg-2: #1e1b4b;
+  --ui-bg-3: #2e1065;
+
+  --ui-glass-bg: rgb(15 23 42 / 0.55);
+  --ui-text: #f8fafc;
+  --ui-text-sub: #94a3b8;
+  --ui-line: rgb(148 163 184 / 0.3);
+  --ui-danger: #fb7185;
+  --ui-success: #34d399;
+
+  --ui-ring: 3px;                     /* độ dày Border Glow */
+  --ui-radius: 28px;                  /* bo góc ngoài */
+  --ui-radius-ctl: 12px;              /* bo góc nút / alert */
+  --ui-font: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* 2. LIQUID GRADIENT — nền trang ------------------------------------------- */
+.ui-page {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  box-sizing: border-box;
+  overflow-x: hidden;                 /* KHÔNG dùng overflow:hidden — chặn cuộn trên mobile */
+  font-family: var(--ui-font);
+  line-height: 1.5;                   /* đủ chỗ cho dấu tiếng Việt */
+  color: var(--ui-text);
+  background: linear-gradient(135deg, var(--ui-bg-1), var(--ui-bg-2), var(--ui-bg-3), var(--ui-bg-1));
+  background-size: 300% 300%;
+  animation: ui-liquid 15s ease infinite;
+}
+
+@keyframes ui-liquid {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 3. NEO-GLASS + BORDER GLOW ------------------------------------------------ */
+.ui-container {
+  position: relative;
+  width: min(100%, 400px);
+  box-sizing: border-box;
+  padding: var(--ui-ring);
+  border-radius: var(--ui-radius);
+  /* Vòng sáng quay quanh viền (hiện trong phần padding, thẻ kính che phần giữa) */
+  background: conic-gradient(from var(--ui-angle), transparent, transparent, var(--ui-glow), transparent);
+  animation: ui-spin 5s linear infinite;
+  /* Soft Shadow đa tầng */
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.2),
+    0 20px 25px -5px rgb(var(--ui-glow-rgb) / 0.15),
+    0 25px 50px -12px rgb(0 0 0 / 0.5);
+}
+.ui-container--wide { width: min(100%, 720px); }
+
+@keyframes ui-spin { to { --ui-angle: 360deg; } }
+
+.ui-card {
+  position: relative;
+  z-index: 1;
+  padding: 40px 35px;
+  border-radius: calc(var(--ui-radius) - var(--ui-ring));
+  background: var(--ui-glass-bg);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.15);   /* cạnh kính phản chiếu */
+}
+/* Thẻ kính phụ (không viền sáng) — dùng cho khối thứ 2, 3 trên cùng trang */
+.ui-card--flat {
+  border-radius: var(--ui-radius);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.12), 0 20px 40px -12px rgb(0 0 0 / 0.45);
+}
+@media (max-width: 420px) { .ui-card { padding: 32px 24px; } }
+
+.ui-title    { margin: 0 0 8px; color: var(--ui-text); font-size: 26px; font-weight: 700; letter-spacing: .5px; }
+.ui-subtitle { margin: 0 0 35px; color: var(--ui-text-sub); font-size: 14px; }
+
+/* 4. FLOATING LABEL + UNDERLINE SLEEK --------------------------------------
+   Bắt buộc: <input class="ui-input" placeholder=" "> rồi mới tới <label class="ui-label">
+   .ui-field phải có margin-bottom ≥ 34px (chỗ cho .ui-msg và nhãn bay của ô kế tiếp) */
+.ui-field { position: relative; width: 100%; margin-bottom: 34px; }
+
+.ui-input,
+.ui-textarea,
+.ui-select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 0;
+  font: inherit;
+  font-size: 16px;                    /* ≥16px để iOS không tự zoom */
+  color: var(--ui-text);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--ui-line);
+  border-radius: 0;
+  outline: none;
+  transition: border-color .3s ease;
+}
+.ui-textarea { min-height: 96px; resize: vertical; }
+
+.ui-label {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  font-size: 16px;
+  color: var(--ui-text-sub);
+  pointer-events: none;
+  transition: all .3s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* Gạch chân Sleek: mở từ tâm ra hai bên */
+.ui-field::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background: var(--ui-glow);
+  transition: width .3s ease, left .3s ease;
+}
+.ui-field:focus-within::after { width: 100%; left: 0; }
+.ui-input:focus, .ui-textarea:focus, .ui-select:focus { border-bottom-color: transparent; }
+
+/* Nhãn bay lên */
+.ui-input:focus ~ .ui-label,
+.ui-input:not(:placeholder-shown) ~ .ui-label,
+.ui-input:-webkit-autofill ~ .ui-label,
+.ui-textarea:focus ~ .ui-label,
+.ui-textarea:not(:placeholder-shown) ~ .ui-label {
+  top: -10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ui-glow);
+}
+
+/* <select> và các input date/time/file: nhãn luôn ở trên */
+.ui-select ~ .ui-label,
+.ui-field--static .ui-label { top: -10px; font-size: 12px; font-weight: 600; }
+.ui-select:focus ~ .ui-label,
+.ui-field--static:focus-within .ui-label { color: var(--ui-glow); }
+
+.ui-select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 28px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+}
+.ui-select option { background: #0f172a; color: var(--ui-text); }
+
+/* Autofill của trình duyệt không được phá nền kính */
+.ui-input:-webkit-autofill {
+  -webkit-text-fill-color: var(--ui-text);
+  caret-color: var(--ui-text);
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Thông báo dưới ô nhập + trạng thái lỗi/thành công */
+.ui-msg { position: absolute; left: 0; top: 100%; margin-top: 2px; font-size: 12px; line-height: 1.3; color: var(--ui-text-sub); }
+.ui-field:has(.ui-msg) { margin-bottom: 42px; }   /* chừa chỗ cho thông báo */
+.ui-field.is-invalid .ui-input,
+.ui-field.is-invalid .ui-textarea,
+.ui-field.is-invalid .ui-select { border-bottom-color: var(--ui-danger); }
+.ui-field.is-invalid::after { width: 100%; left: 0; background: var(--ui-danger); }
+.ui-field.is-invalid .ui-label,
+.ui-field.is-invalid .ui-msg { color: var(--ui-danger); }
+.ui-field.is-valid::after { width: 100%; left: 0; background: var(--ui-success); }
+.ui-field.is-valid .ui-msg { color: var(--ui-success); }
+
+/* 5. NÚT, LIÊN KẾT, THÀNH PHẦN PHỤ ------------------------------------------ */
+.ui-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ui-text);
+  cursor: pointer;
+  background: linear-gradient(135deg, rgb(var(--ui-glow-rgb) / .35), rgb(var(--ui-glow-deep-rgb) / .45));
+  border: 1px solid rgb(var(--ui-glow-rgb) / .4);
+  border-radius: var(--ui-radius-ctl);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  transition: background .3s ease, color .3s ease, box-shadow .3s ease, border-color .3s ease, transform .1s ease;
+}
+.ui-btn:hover {
+  background: var(--ui-glow);
+  color: #0f172a;
+  border-color: transparent;
+  box-shadow: 0 0 20px rgb(var(--ui-glow-rgb) / .6);
+}
+.ui-btn:active { transform: translateY(1px); }
+.ui-btn:focus-visible { outline: 2px solid var(--ui-glow); outline-offset: 3px; }
+.ui-btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+.ui-btn--auto { width: auto; padding: 12px 24px; }
+.ui-btn--ghost { background: transparent; border-color: var(--ui-line); }
+
+.ui-link { color: var(--ui-glow); text-decoration: none; }
+.ui-link:hover { text-decoration: underline; }
+.ui-link:focus-visible { outline: 2px solid var(--ui-glow); outline-offset: 2px; border-radius: 4px; }
+
+.ui-check { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 14px; color: var(--ui-text-sub); cursor: pointer; }
+.ui-check input { width: 18px; height: 18px; accent-color: var(--ui-glow); }
+
+.ui-alert {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  font-size: 14px;
+  border-radius: var(--ui-radius-ctl);
+  border: 1px solid rgb(var(--ui-glow-rgb) / .35);
+  background: rgb(var(--ui-glow-rgb) / .1);
+}
+.ui-alert--danger { color: var(--ui-danger); border-color: rgb(251 113 133 / .4); background: rgb(251 113 133 / .1); }
+
+/* 6. DỰ PHÒNG & TRUY CẬP ---------------------------------------------------- */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .ui-card { background: rgb(15 23 42 / .88); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-page, .ui-container { animation: none; }
+  .ui-label, .ui-field::after, .ui-btn { transition: none; }
+}
+
+/* 7. TÙY BIẾN CHO DỰ ÁN digital-business-card --------------------------------
+   Phần lõi ở trên giữ nguyên theo skill; chỉ thêm các điểm riêng của dự án. */
+
+/* Font của dự án (đã có sẵn trong assets/inter.css, hỗ trợ tiếng Việt) */
+:root {
+  --ui-font: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color-scheme: dark;                 /* thanh cuộn, control gốc của trình duyệt cũng tối */
+}
+
+/* Theme danh thiếp: JS thêm class theme-creative / theme-ocean lên <body>.
+   Phải khai báo lại --ui-glow vì biến này đã được tính sẵn ở :root. */
+body.theme-creative {
+  --ui-glow-rgb: 251 113 133;         /* preset Rose */
+  --ui-glow-deep-rgb: 159 18 57;
+  --ui-glow: rgb(var(--ui-glow-rgb));
+  --ui-bg-2: #3f0a1c;
+  --ui-bg-3: #4a0d24;
+}
+body.theme-ocean {
+  --ui-glow-rgb: 52 211 153;          /* preset Emerald */
+  --ui-glow-deep-rgb: 4 120 87;
+  --ui-glow: rgb(var(--ui-glow-rgb));
+  --ui-bg-2: #042f2e;
+  --ui-bg-3: #053d33;
+}
+
+/* Tailwind v3.0 (preflight) đặt background-image:none cho button[type=...] và được nạp
+   SAU file này, nên nút mất màu gradient. Tăng độ ưu tiên bằng selector button.ui-btn. */
+button.ui-btn {
+  background: linear-gradient(135deg, rgb(var(--ui-glow-rgb) / .35), rgb(var(--ui-glow-deep-rgb) / .45));
+}
+button.ui-btn--ghost { background: transparent; }
+button.ui-btn:hover  { background: var(--ui-glow); }
