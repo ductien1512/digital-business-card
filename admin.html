@@ -278,10 +278,39 @@
             .action-buttons { position: sticky; bottom: 16px; z-index: 5; padding-top: 12px; background: rgba(255, 255, 255, .94); }
         }
 
+
+        /* 3-in-1 future design system */
+        :root { --future-ink: #e5e7eb; --future-muted: #aab4c7; --future-line: rgba(255,255,255,.12); --future-glow: #38bdf8; --future-glow-2: #8b5cf6; }
+        body { position: relative; isolation: isolate; overflow-x: hidden; background: #0f172a; color: var(--future-ink); }
+        body::before { content: ""; position: fixed; inset: -18%; z-index: -2; pointer-events: none; background: linear-gradient(135deg,#0f172a,#1e1b4b,#2e1065,#0f172a,#172554); background-size: 320% 320%; animation: liquidBackground 24s ease-in-out infinite; }
+        body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 18% 12%,rgba(56,189,248,.14),transparent 28%),radial-gradient(circle at 86% 76%,rgba(139,92,246,.16),transparent 30%); }
+        @keyframes liquidBackground { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+        .ultimate-container { position: relative; z-index: 0; overflow: hidden; border-radius: 25px; }
+        .ultimate-container::before { content: ""; position: absolute; inset: -70%; z-index: 0; background: conic-gradient(from 0deg,transparent 0 28%,rgba(56,189,248,.9) 38%,rgba(139,92,246,.95) 52%,transparent 62% 100%); animation: borderGlowSpin 12s linear infinite; }
+        .ultimate-container > * { position: relative; z-index: 1; }
+        @keyframes borderGlowSpin { to { transform: rotate(360deg); } }
+        .container { position: relative; }
+        .card { position: relative; z-index: 1; background: rgba(15,23,42,.70); border: 1px solid rgba(255,255,255,.16); border-radius: 22px; box-shadow: inset 0 1px 0 rgba(255,255,255,.12),0 24px 65px rgba(0,0,0,.35); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .header h1 { color: #f8fafc; } .header p, .form-label { color: #aab4c7; }
+        .profile-preview, .theme-option { background: rgba(15,23,42,.42); border-color: rgba(255,255,255,.12); }
+        .profile-preview #previewName { color: #f8fafc; } .profile-preview #previewPhone { color: #aab4c7; }
+        .tabs { border-color: rgba(255,255,255,.12); } .tab-btn { color: #aab4c7; } .tab-btn.active { color: #7dd3fc; border-bottom-color: #38bdf8; }
+        .float-field { position: relative; margin-top: 18px; }
+        .float-field .form-input { margin: 0; min-height: 48px; padding: 18px 14px 8px; background: rgba(15,23,42,.44); color: #f8fafc; border: 0; border-bottom: 1px solid rgba(255,255,255,.24); border-radius: 10px 10px 2px 2px; }
+        .float-field .form-input::placeholder { color: transparent; }
+        .float-label { position: absolute; z-index: 1; top: 15px; left: 14px; margin: 0; pointer-events: none; color: #aab4c7 !important; transition: transform .22s ease,color .22s ease,font-size .22s ease; }
+        .float-field .form-input:focus + .float-label, .float-field .form-input:not(:placeholder-shown) + .float-label { transform: translateY(-10px); color: #7dd3fc !important; font-size: 10px; letter-spacing: .06em; }
+        .float-field::after { content: ""; position: absolute; left: 50%; right: 50%; bottom: 0; height: 2px; border-radius: 9px; background: linear-gradient(90deg,var(--future-glow),var(--future-glow-2)); transition: left .24s ease,right .24s ease; pointer-events: none; }
+        .float-field:focus-within::after { left: 0; right: 0; }
+        .btn, .file-picker { border: 1px solid rgba(125,211,252,.28); border-radius: 12px; background: linear-gradient(115deg,rgba(14,165,233,.82),rgba(124,58,237,.82)); box-shadow: 0 0 20px rgba(56,189,248,.14); }
+        .btn-danger { background: rgba(127,29,29,.55); color: #fecaca; border-color: rgba(248,113,113,.30); }
+        .btn:hover, .file-picker:hover { box-shadow: 0 0 26px rgba(56,189,248,.30); filter: brightness(1.08); }
+        .action-buttons { background: transparent !important; }
+        @media (prefers-reduced-motion: reduce) { body::before,.ultimate-container::before { animation:none; } }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container ultimate-container">
         <div id="firebaseConfigError" class="error-message" style="display: none;"></div>
         <!-- Login Form -->
         <div id="authForm" class="card auth-form">
@@ -293,13 +322,17 @@
             <div id="errorMessage" class="error-message"></div>
 
             <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" id="loginEmail" class="form-input" placeholder="admin@example.com">
+                <div class="float-field">
+                        <input type="email" id="loginEmail" class="form-input" placeholder="admin@example.com">
+                        <label class="form-label float-label">Email</label>
+                    </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Mật khẩu</label>
-                <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+                <div class="float-field">
+                        <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+                        <label class="form-label float-label">Mật khẩu</label>
+                    </div>
             </div>
 
             <button onclick="login()" class="btn btn-primary">
@@ -321,13 +354,17 @@
             <div id="signupError" class="error-message"></div>
 
             <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" id="signupEmail" class="form-input" placeholder="admin@example.com">
+                <div class="float-field">
+                        <input type="email" id="signupEmail" class="form-input" placeholder="admin@example.com">
+                        <label class="form-label float-label">Email</label>
+                    </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Mật khẩu (tối thiểu 6 ký tự)</label>
-                <input type="password" id="signupPassword" class="form-input" placeholder="••••••••">
+                <div class="float-field">
+                        <input type="password" id="signupPassword" class="form-input" placeholder="••••••••">
+                        <label class="form-label float-label">Mật khẩu (tối thiểu 6 ký tự)</label>
+                    </div>
             </div>
 
             <button onclick="signup()" class="btn btn-primary">
@@ -381,49 +418,65 @@
             <!-- Tab: Personal Info -->
             <div id="personalTab" class="tab-content active">
                 <div class="form-group">
-                    <label class="form-label">Họ và tên</label>
-                    <input type="text" id="fullName" class="form-input" placeholder="Trần Đức Tiền">
+                    <div class="float-field">
+                        <input type="text" id="fullName" class="form-input" placeholder="Trần Đức Tiền">
+                        <label class="form-label float-label">Họ và tên</label>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Số điện thoại</label>
-                    <input type="tel" id="phone" class="form-input" placeholder="+84396558306">
+                    <div class="float-field">
+                        <input type="tel" id="phone" class="form-input" placeholder="+84396558306">
+                        <label class="form-label float-label">Số điện thoại</label>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" id="email" class="form-input" placeholder="hierductien@gmail.com">
+                    <div class="float-field">
+                        <input type="email" id="email" class="form-input" placeholder="hierductien@gmail.com">
+                        <label class="form-label float-label">Email</label>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Tên Zalo</label>
-                    <input type="text" id="zaloName" class="form-input" placeholder="Trần Đức Tiền">
+                    <div class="float-field">
+                        <input type="text" id="zaloName" class="form-input" placeholder="Trần Đức Tiền">
+                        <label class="form-label float-label">Tên Zalo</label>
+                    </div>
                 </div>
             </div>
 
             <!-- Tab: Social Links -->
             <div id="socialTab" class="tab-content">
                 <div class="form-group">
-                    <label class="form-label">Link Zalo</label>
-                    <input type="url" id="zaloLink" class="form-input" placeholder="https://zalo.me/0396558306">
+                    <div class="float-field">
+                        <input type="url" id="zaloLink" class="form-input" placeholder="https://zalo.me/0396558306">
+                        <label class="form-label float-label">Link Zalo</label>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Username Facebook</label>
-                    <input type="text" id="facebookUsername" class="form-input" placeholder="tranductien2006">
+                    <div class="float-field">
+                        <input type="text" id="facebookUsername" class="form-input" placeholder="tranductien2006">
+                        <label class="form-label float-label">Username Facebook</label>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Link Facebook</label>
-                    <input type="url" id="facebookLink" class="form-input" placeholder="https://facebook.com/tranductien2006">
+                    <div class="float-field">
+                        <input type="url" id="facebookLink" class="form-input" placeholder="https://facebook.com/tranductien2006">
+                        <label class="form-label float-label">Link Facebook</label>
+                    </div>
                 </div>
             </div>
 
             <!-- Tab: Profile Image -->
             <div id="imageTab" class="tab-content">
                 <div class="form-group">
-                    <label class="form-label">URL Ảnh đại diện</label>
-                    <input type="url" id="profileImage" class="form-input" placeholder="https://example.com/image.jpg">
+                    <div class="float-field">
+                        <input type="url" id="profileImage" class="form-input" placeholder="https://example.com/image.jpg">
+                        <label class="form-label float-label">URL Ảnh đại diện</label>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -528,16 +581,11 @@
         if (auth) auth.onAuthStateChanged((user) => {
             if (user) {
                 // User is logged in
-                if (user.email === 'hierductien@gmail.com') {
-                    document.getElementById('authForm').style.display = 'none';           
-                    document.getElementById('signupForm').style.display = 'none';          
-                    document.getElementById('adminPanel').style.display = 'block';
-                    document.getElementById('userEmail').textContent = user.email;
-            loadProfileData();
-                } else {
-                    auth.signOut();
-                    alert('Bạn không có quyền truy cập trang quản trị này!');
-                }
+                document.getElementById('authForm').style.display = 'none';
+                document.getElementById('signupForm').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('userEmail').textContent = user.email;
+                loadProfileData();
             } else {
                 // User is logged out
                 document.getElementById('authForm').style.display = 'block';

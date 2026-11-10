@@ -587,6 +587,91 @@
         @media (max-width: 420px) {
             .contact-form-section { padding: 24px !important; }
         }
+
+        /* 3-in-1 future design system: liquid background + neo-glass + sleek forms */
+        :root {
+            --future-ink: #e5e7eb;
+            --future-muted: #aab4c7;
+            --future-line: rgba(255, 255, 255, .12);
+            --future-glass: rgba(15, 23, 42, .68);
+            --future-glow: #38bdf8;
+            --future-glow-2: #8b5cf6;
+        }
+        body {
+            position: relative;
+            isolation: isolate;
+            overflow-x: hidden;
+            background: #0f172a;
+            color: var(--future-ink);
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -18%;
+            z-index: -2;
+            pointer-events: none;
+            background: linear-gradient(135deg, #0f172a, #1e1b4b, #2e1065, #0f172a, #172554);
+            background-size: 320% 320%;
+            animation: liquidBackground 24s ease-in-out infinite;
+        }
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(circle at 18% 12%, rgba(56, 189, 248, .14), transparent 28%), radial-gradient(circle at 86% 76%, rgba(139, 92, 246, .16), transparent 30%);
+        }
+        @keyframes liquidBackground {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        #card-container { width: min(100%, 440px); }
+        .ultimate-container {
+            position: relative;
+            padding: 1px;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 28px 90px rgba(0, 0, 0, .42), 0 0 42px rgba(56, 189, 248, .10);
+        }
+        .ultimate-container::before {
+            content: "";
+            position: absolute;
+            inset: -70%;
+            background: conic-gradient(from 0deg, transparent 0 28%, rgba(56, 189, 248, .9) 38%, rgba(139, 92, 246, .95) 52%, transparent 62% 100%);
+            animation: borderGlowSpin 12s linear infinite;
+        }
+        @keyframes borderGlowSpin { to { transform: rotate(360deg); } }
+        .card {
+            position: relative;
+            z-index: 1;
+            max-width: none;
+            background: var(--future-glass);
+            border: 1px solid rgba(255, 255, 255, .16);
+            border-radius: 24px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 18px 55px rgba(0, 0, 0, .28);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .card:hover { transform: none; }
+        .header-bg { background: linear-gradient(118deg, rgba(14, 116, 144, .82), rgba(76, 29, 149, .84)); }
+        .contact-item, .footer-actions, .contact-form-section { background: rgba(15, 23, 42, .34) !important; border-color: var(--future-line); }
+        .contact-item:hover { background: rgba(56, 189, 248, .10) !important; border-color: rgba(56, 189, 248, .34); }
+        .text-gray-900, .text-gray-800, .contact-content p:last-child { color: #f1f5f9 !important; }
+        .text-gray-500, .text-gray-400, .contact-content p:first-child { color: var(--future-muted) !important; }
+        .float-field { position: relative; margin-top: 18px; }
+        .float-field .form-input { margin: 0; min-height: 48px; padding: 18px 14px 8px; background: rgba(15, 23, 42, .38); color: #f8fafc; border: 0; border-bottom: 1px solid rgba(255, 255, 255, .24); border-radius: 10px 10px 2px 2px; }
+        .float-field textarea.form-input { min-height: 108px; padding-top: 24px; resize: vertical; }
+        .float-field .form-input::placeholder { color: transparent; }
+        .float-label { position: absolute; z-index: 1; top: 15px; left: 14px; margin: 0; pointer-events: none; color: #aab4c7 !important; transition: transform .22s ease, color .22s ease, font-size .22s ease; }
+        .float-field .form-input:focus + .float-label, .float-field .form-input:not(:placeholder-shown) + .float-label { transform: translateY(-10px); color: #7dd3fc !important; font-size: 10px; letter-spacing: .06em; }
+        .float-field::after { content: ""; position: absolute; left: 50%; right: 50%; bottom: 0; height: 2px; border-radius: 9px; background: linear-gradient(90deg, var(--future-glow), var(--future-glow-2)); transition: left .24s ease, right .24s ease; pointer-events: none; }
+        .float-field:focus-within::after { left: 0; right: 0; }
+        .vcard-button, .submit-btn { border: 1px solid rgba(125, 211, 252, .32); background: linear-gradient(115deg, rgba(14, 165, 233, .84), rgba(124, 58, 237, .84)); box-shadow: 0 0 22px rgba(56, 189, 248, .16); }
+        .vcard-button:hover, .submit-btn:hover, .btn:hover { box-shadow: 0 0 26px rgba(56, 189, 248, .30); filter: brightness(1.08); }
+        .lang-toggle, .theme-toggle { background: rgba(15, 23, 42, .72) !important; border-color: rgba(255, 255, 255, .16) !important; color: #e5e7eb; backdrop-filter: blur(14px); }
+        @media (prefers-reduced-motion: reduce) { body::before, .ultimate-container::before { animation: none; } }
+        @media (max-width: 480px) { .ultimate-container { border-radius: 21px; } .card { border-radius: 20px; } }
     </style>
 </head>
 <body>
@@ -610,6 +695,7 @@
     <div id="firebaseError" class="firebase-error" role="alert" style="display: none;"></div>
 
     <div id="card-container" style="display: none;">
+        <div class="ultimate-container">
         <div class="card">
             <!-- Header -->
             <div class="header-bg"></div>
@@ -725,25 +811,35 @@
                 <p data-lang="form-desc" class="text-xs text-gray-500 mb-4">Gửi thông tin của bạn để chúng ta có thể kết nối.</p>
                 
                 <form id="lead-form" action="https://formspree.io/f/meaawoql" method="POST">
-                    <label data-lang="label-name" class="form-label">Họ và tên *</label>
-                    <input type="text" name="name" required class="form-input" data-placeholder="ph-name" placeholder="Nguyễn Văn A">
+                    <div class="float-field">
+                            <input type="text" name="name" required class="form-input" data-placeholder="ph-name" placeholder="Nguyễn Văn A">
+                            <label data-lang="label-name" class="form-label float-label">Họ và tên *</label>
+                        </div>
                     
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label data-lang="label-phone" class="form-label">Số điện thoại *</label>
+                            <div class="float-field">
                             <input type="tel" name="phone" required class="form-input" data-placeholder="ph-phone" placeholder="090...">
+                            <label data-lang="label-phone" class="form-label float-label">Số điện thoại *</label>
+                        </div>
                         </div>
                         <div>
-                            <label data-lang="label-email" class="form-label">Email *</label>
+                            <div class="float-field">
                             <input type="email" name="email" required class="form-input" data-placeholder="ph-email" placeholder="abc@gmail.com">
+                            <label data-lang="label-email" class="form-label float-label">Email *</label>
+                        </div>
                         </div>
                     </div>
                     
-                    <label data-lang="label-company" class="form-label">Công ty (không bắt buộc)</label>
-                    <input type="text" name="company" class="form-input" data-placeholder="ph-company" placeholder="Tên công ty của bạn">
+                    <div class="float-field">
+                            <input type="text" name="company" class="form-input" data-placeholder="ph-company" placeholder="Tên công ty của bạn">
+                            <label data-lang="label-company" class="form-label float-label">Công ty (không bắt buộc)</label>
+                        </div>
                     
-                    <label data-lang="label-message" class="form-label">Lời nhắn</label>
-                    <textarea name="message" rows="3" class="form-input" data-placeholder="ph-message" placeholder="Bạn muốn nhắn gì cho mình không?"></textarea>
+                    <div class="float-field">
+                            <textarea name="message" rows="3" class="form-input" data-placeholder="ph-message" placeholder="Bạn muốn nhắn gì cho mình không?"></textarea>
+                            <label data-lang="label-message" class="form-label float-label">Lời nhắn</label>
+                        </div>
                     
                     <button type="submit" id="submit-button" class="submit-btn" data-lang="submit-btn">Gửi thông tin</button>
                 </form>
@@ -751,6 +847,7 @@
                     <i class="fas fa-check-circle mr-2"></i> <span data-lang="success-msg">Cảm ơn! Thông tin của bạn đã được gửi thành công.</span>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 
