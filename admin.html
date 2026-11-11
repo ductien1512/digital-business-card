@@ -15,7 +15,8 @@
     <link rel="stylesheet" href="assets/ultimate-ui.css">
     <style>
         /* Bố cục riêng của trang admin. Màu sắc/hiệu ứng lõi nằm trong assets/ultimate-ui.css */
-        .admin-shell { width: min(100%, 720px); display: grid; justify-items: center; gap: 16px; }
+        .admin-shell { width: min(100%, 720px); display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 16px; }
+        .admin-shell > * { min-width: 0; }
         .admin-shell > .ui-container { max-width: 100%; }
         .admin-shell > .error-message { width: min(100%, 420px); }
         .admin-panel { display: none; }              /* JS bật bằng style.display = 'block' */
@@ -69,7 +70,7 @@
 
         /* Tab: gạch chân sáng theo màu theme */
         .tabs {
-            display: flex; gap: 6px; margin-bottom: 30px; overflow-x: auto;
+            min-width: 0; display: flex; gap: 6px; margin-bottom: 30px; overflow-x: auto;
             border-bottom: 2px solid var(--ui-line);
             overscroll-behavior-x: contain; scrollbar-width: thin; -webkit-overflow-scrolling: touch;
         }
