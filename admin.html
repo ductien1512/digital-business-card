@@ -11,474 +11,331 @@
     <script src="assets/firebase-app-compat.js"></script>
     <script src="assets/firebase-database-compat.js"></script>
     <script src="assets/firebase-auth-compat.js"></script>
+    <!-- Phong cách Ultimate UI 3-in-1 (Neo-Glass + Floating Label + Liquid Gradient) -->
+    <link rel="stylesheet" href="assets/ultimate-ui.css">
     <style>
-        :root { --admin-primary: #2563eb; --admin-secondary: #7c3aed; }
-        body.theme-creative { --admin-primary: #db2777; --admin-secondary: #f97316; }
-        body.theme-ocean { --admin-primary: #0891b2; --admin-secondary: #2563eb; }
-        body {
+        /* Bố cục riêng của trang admin. Màu sắc/hiệu ứng lõi nằm trong assets/ultimate-ui.css */
+        .admin-shell { width: min(100%, 720px); display: grid; justify-items: center; gap: 16px; }
+        .admin-shell > .ui-container { max-width: 100%; }
+        .admin-shell > .error-message { width: min(100%, 420px); }
+        .admin-panel { display: none; }              /* JS bật bằng style.display = 'block' */
 
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f3f4f6 0%, #d1d5db 100%);
-            min-height: 100vh;
-            padding-bottom: 24px;
+        .ui-title i { margin-right: 8px; color: var(--ui-glow); }
+        .ui-btn i { margin-right: 8px; }
+        .ui-subtitle.header-sub { margin-bottom: 28px; }
+        .switch-line { margin: 22px 0 0; text-align: center; }
+        .ui-btn--danger { color: var(--ui-danger); border-color: color-mix(in srgb, var(--ui-danger) 45%, transparent); }
+        .ui-btn--danger:hover {
+            background: var(--ui-danger); color: #0f172a; border-color: transparent;
+            box-shadow: 0 0 20px color-mix(in srgb, var(--ui-danger) 55%, transparent);
         }
-        *, *::before, *::after { box-sizing: border-box; }
-        .container {
-            width: min(100%, 640px);
-            margin: 0 auto;
-            padding: 20px 16px;
-        }
-        .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            margin-top: 40px;
-            width: 100%;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-        .form-input {
-            width: 100%;
-            padding: 11px 14px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 14px;
-            transition: all 0.3s;
-            background: #ffffff;
-        }
-        .form-input:focus {
-            outline: none;
-            border-color: var(--admin-primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: none;
-            font-size: 14px;
-        }
-        .btn-primary {
-            background: linear-gradient(to right, var(--admin-primary), var(--admin-secondary));
-            color: white;
-            width: 100%;
-        }
-        .btn-primary:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-            width: 100%;
-            margin-top: 10px;
-        }
-        .btn-danger:hover {
-            opacity: 0.9;
-        }
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-            width: 100%;
-        }
-        .btn-secondary:hover {
-            opacity: 0.9;
-        }
-        .action-buttons {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(110px, .42fr);
-            gap: 10px;
-            margin-top: 22px;
-        }
-        .action-buttons .btn { width: 100%; margin: 0; }
-        .btn-danger {
-            background: #fff1f2;
-            color: #be123c;
-            border: 1px solid #fecdd3;
-        }
-        .btn-danger:hover { background: #ffe4e6; }
-        .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-        .file-picker {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            min-height: 46px;
-            padding: 11px 14px;
-            border: 1px dashed #93c5fd;
-            border-radius: 12px;
-            background: #eff6ff;
-            color: #1d4ed8;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background .2s ease, border-color .2s ease, transform .2s ease;
-        }
-        .file-picker:hover { background: #dbeafe; border-color: var(--admin-primary); }
-        .file-picker:active { transform: scale(.99); }
-        .auth-form {
-            display: block;
-        }
-        .admin-panel {
-            display: none;
-        }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        .success-message {
-            background: #ecfdf5;
-            color: #059669;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
+        button.ui-btn--danger:hover { background: var(--ui-danger); }
+
+        /* Thông báo (JS bật/tắt bằng style.display) */
+        .error-message, .success-message {
+            display: none; margin-bottom: 20px; padding: 12px 14px; font-size: 14px;
+            border-radius: var(--ui-radius-ctl);
         }
         .error-message {
-            background: #fee2e2;
-            color: #dc2626;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
+            color: var(--ui-danger);
+            border: 1px solid color-mix(in srgb, var(--ui-danger) 45%, transparent);
+            background: color-mix(in srgb, var(--ui-danger) 10%, rgb(15 23 42 / .85));
         }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        .success-message {
+            color: var(--ui-success);
+            border: 1px solid color-mix(in srgb, var(--ui-success) 40%, transparent);
+            background: color-mix(in srgb, var(--ui-success) 10%, transparent);
         }
-        .header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-        .header p {
-            color: #6b7280;
-            font-size: 14px;
-        }
+        .loading { text-align: center; color: var(--ui-text-sub); }
+
+        /* Đầu panel + xem trước hồ sơ */
+        #userEmail { color: var(--ui-glow); font-weight: 600; }
         .profile-preview {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 24px;
-            padding: 14px 16px;
-            background: #f9fafb;
-            border-radius: 12px;
+            display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding: 14px 16px;
+            border-radius: 16px;
+            background: rgb(255 255 255 / .04);
+            border: 1px solid rgb(255 255 255 / .08);
         }
         .profile-preview img {
-            flex: 0 0 76px;
-            width: 76px;
-            height: 76px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 0;
-            border: 3px solid white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex: 0 0 76px; width: 76px; height: 76px; border-radius: 50%; object-fit: cover; margin: 0;
+            border: 3px solid rgb(var(--ui-glow-rgb) / .65);
+            box-shadow: 0 0 0 5px rgb(var(--ui-glow-rgb) / .12), 0 10px 24px -8px rgb(var(--ui-glow-rgb) / .45);
         }
-        .profile-preview > i {
-            flex: 0 0 76px;
-            width: 76px;
-            text-align: center;
-        }
+        .profile-preview > i { flex: 0 0 76px; width: 76px; text-align: center; font-size: 48px; color: var(--ui-text-sub); }
         .preview-details { min-width: 0; text-align: left; }
-        .profile-preview p {
-            color: #6b7280;
-            font-size: 14px;
-            margin: 3px 0 0;
-            overflow-wrap: anywhere;
-        }
-        .profile-preview #previewName { color: #1f2937; font-size: 16px; font-weight: 700; margin-top: 0; }
-        .profile-preview #previewPhone { color: #9ca3af; font-size: 13px; }
+        .profile-preview p { margin: 3px 0 0; font-size: 14px; color: var(--ui-text-sub); overflow-wrap: anywhere; }
+        .profile-preview #previewName { margin-top: 0; font-size: 16px; font-weight: 700; color: var(--ui-text); }
+        .profile-preview #previewPhone { font-size: 13px; }
+
+        /* Tab: gạch chân sáng theo màu theme */
         .tabs {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e5e7eb;
-            overflow-x: auto;
-            overscroll-behavior-x: contain;
-            scrollbar-width: thin;
-            -webkit-overflow-scrolling: touch;
+            display: flex; gap: 6px; margin-bottom: 30px; overflow-x: auto;
+            border-bottom: 2px solid var(--ui-line);
+            overscroll-behavior-x: contain; scrollbar-width: thin; -webkit-overflow-scrolling: touch;
         }
         .tab-btn {
-            flex: 0 0 auto;
-            min-width: 96px;
-            padding: 11px 12px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-            white-space: nowrap;
-            color: #6b7280;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
+            flex: 0 0 auto; min-width: 96px; padding: 11px 12px; margin-bottom: -2px;
+            font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer;
+            color: var(--ui-text-sub); background: none; border: none; border-bottom: 3px solid transparent;
+            transition: color .3s ease, border-color .3s ease, text-shadow .3s ease;
         }
-        .tab-btn.active {
-            color: var(--admin-primary);
-            border-bottom-color: var(--admin-primary);
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .theme-options { display: grid; gap: 12px; }
-        .theme-option { display: flex; align-items: center; gap: 12px; padding: 14px; border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all .2s ease; }
-        .theme-option:hover, .theme-option.selected { border-color: var(--admin-primary); background: #f8fafc; }
-        .theme-swatch { width: 42px; height: 42px; border-radius: 10px; flex: 0 0 auto; }
-        .theme-swatch.professional { background: linear-gradient(135deg, #111827, #ffffff); }
-        .theme-swatch.creative { background: linear-gradient(135deg, #db2777, #f97316); }
-        .theme-swatch.ocean { background: linear-gradient(135deg, #0891b2, #2563eb); }
+        .tab-btn i { margin-right: 6px; pointer-events: none; }   /* click vào icon vẫn tính là click nút */
+        .tab-btn:hover { color: var(--ui-text); }
+        .tab-btn.active { color: var(--ui-glow); border-bottom-color: var(--ui-glow); text-shadow: 0 0 14px rgb(var(--ui-glow-rgb) / .5); }
+        .tab-btn:focus-visible { outline: 2px solid var(--ui-glow); outline-offset: -2px; border-radius: 6px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        /* Mobile layout: compact preview and one-row horizontally scrollable navigation. */
+        /* Tải ảnh */
+        .field-caption { margin: 0 0 10px; font-size: 12px; font-weight: 600; color: var(--ui-text-sub); }
+        .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+        .file-picker {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; min-height: 46px; padding: 11px 14px; box-sizing: border-box;
+            font-size: 14px; font-weight: 700; color: var(--ui-glow); cursor: pointer;
+            border: 1px dashed rgb(var(--ui-glow-rgb) / .55); border-radius: var(--ui-radius-ctl);
+            background: rgb(var(--ui-glow-rgb) / .08);
+            transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+        }
+        .file-picker:hover { background: rgb(var(--ui-glow-rgb) / .16); border-style: solid; box-shadow: 0 0 18px rgb(var(--ui-glow-rgb) / .3); }
+        .file-picker:active { transform: scale(.99); }
+        .upload-status { margin: 10px 0 0; font-size: 12px; line-height: 1.5; color: var(--ui-text-sub); }
+        .upload-status i { margin-right: 4px; }
+
+        /* Chọn giao diện: swatch giữ đúng màu preset của từng theme */
+        .theme-options { display: grid; gap: 12px; }
+        .theme-option {
+            display: flex; align-items: center; gap: 12px; padding: 14px; cursor: pointer;
+            border: 1px solid rgb(255 255 255 / .10); border-radius: 16px;
+            background: rgb(255 255 255 / .04);
+            transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+        }
+        .theme-option input { accent-color: var(--ui-glow); }
+        .theme-option small { color: var(--ui-text-sub); }
+        .theme-option:hover { border-color: rgb(var(--ui-glow-rgb) / .45); }
+        .theme-option.selected {
+            border-color: var(--ui-glow); background: rgb(var(--ui-glow-rgb) / .10);
+            box-shadow: 0 0 20px -4px rgb(var(--ui-glow-rgb) / .45);
+        }
+        .theme-swatch { width: 42px; height: 42px; border-radius: 10px; flex: 0 0 auto; }
+        .theme-swatch.professional { background: linear-gradient(135deg, rgb(56 189 248), rgb(14 116 144)); }
+        .theme-swatch.creative     { background: linear-gradient(135deg, rgb(251 113 133), rgb(159 18 57)); }
+        .theme-swatch.ocean        { background: linear-gradient(135deg, rgb(52 211 153), rgb(4 120 87)); }
+
+        /* Thanh hành động */
+        .action-buttons { display: grid; grid-template-columns: minmax(0, 1fr) minmax(110px, .42fr); gap: 10px; margin-top: 22px; }
+        .action-buttons .ui-btn { margin: 0; }
+        @media (min-width: 641px) {
+            .action-buttons {
+                position: sticky; bottom: 16px; z-index: 5; padding-top: 14px;
+                background: linear-gradient(to top, rgb(15 23 42 / .55), transparent);
+            }
+        }
+
         @media (max-width: 640px) {
-            body { overflow-x: hidden; }
-            .container { width: 100%; padding: 10px 10px 20px; }
-            .card { width: 100%; padding: 20px 14px; margin-top: 12px; border-radius: 14px; }
-            .header { margin-bottom: 22px; }
-            .header h1 { font-size: clamp(22px, 7vw, 28px); line-height: 1.25; }
+            .ui-card { padding: 28px 18px; }
+            .ui-title { font-size: clamp(22px, 7vw, 26px); line-height: 1.25; }
             .profile-preview { gap: 12px; margin-bottom: 18px; padding: 12px; }
-            .profile-preview img,
-            .profile-preview > i { flex-basis: 64px; width: 64px; height: 64px; }
-            .profile-preview > i { font-size: 34px !important; line-height: 64px; }
+            .profile-preview img, .profile-preview > i { flex-basis: 64px; width: 64px; height: 64px; }
+            .profile-preview > i { font-size: 34px; line-height: 64px; }
             .profile-preview #previewName { font-size: 15px; }
             .profile-preview #previewPhone { font-size: 12px; }
-            .tabs { margin: 0 -4px 18px; padding: 0 4px 2px; }
-            .tab-btn {
-                min-width: 92px;
-                min-height: 44px;
-                padding: 9px 10px;
-                font-size: 12px;
-                border-bottom-width: 3px;
-            }
-            .tab-btn i { margin-right: 4px !important; }
+            .tabs { margin: 0 -4px 26px; padding: 0 4px; }
+            .tab-btn { min-width: 92px; min-height: 44px; padding: 9px 10px; font-size: 12px; }
             .theme-option { min-width: 0; padding: 12px 10px; }
-            .theme-option > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-            .form-input { max-width: 100%; }
-            .form-group { margin-bottom: 16px; }
             .action-buttons { grid-template-columns: 1fr 108px; gap: 8px; margin-top: 18px; }
-            .action-buttons .btn { padding: 11px 8px; font-size: 13px; }
+            .action-buttons .ui-btn { padding: 11px 8px; font-size: 13px; }
         }
-
-        @media (min-width: 641px) {
-            .action-buttons { position: sticky; bottom: 16px; z-index: 5; padding-top: 12px; background: rgba(255, 255, 255, .94); }
+        @media (prefers-reduced-motion: reduce) {
+            .tab-btn, .file-picker, .theme-option { transition: none; }
         }
-
     </style>
 </head>
-<body>
-    <div class="container">
+<body class="ui-page">
+    <div class="admin-shell">
         <div id="firebaseConfigError" class="error-message" style="display: none;"></div>
-        <!-- Login Form -->
-        <div id="authForm" class="card auth-form">
-            <div class="header">
-                <h1><i class="fas fa-lock mr-2"></i>Đăng nhập Admin</h1>
-                <p>Quản lý thông tin danh thiếp của bạn</p>
-            </div>
 
-            <div id="errorMessage" class="error-message"></div>
+        <!-- Đăng nhập -->
+        <div id="authForm" class="ui-container auth-form">
+            <div class="ui-card">
+                <h1 class="ui-title"><i class="fas fa-lock"></i>Đăng nhập Admin</h1>
+                <p class="ui-subtitle">Quản lý thông tin danh thiếp của bạn</p>
 
-            <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" id="loginEmail" class="form-input" placeholder="admin@example.com">
-            </div>
+                <div id="errorMessage" class="error-message"></div>
 
-            <div class="form-group">
-                <label class="form-label">Mật khẩu</label>
-                <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
-            </div>
+                <div class="ui-field">
+                    <input type="email" id="loginEmail" class="ui-input" placeholder=" " autocomplete="username">
+                    <label for="loginEmail" class="ui-label">Email</label>
+                </div>
+                <div class="ui-field">
+                    <input type="password" id="loginPassword" class="ui-input" placeholder=" " autocomplete="current-password">
+                    <label for="loginPassword" class="ui-label">Mật khẩu</label>
+                </div>
 
-            <button onclick="login()" class="btn btn-primary">
-                <i class="fas fa-sign-in-alt mr-2"></i>Đăng nhập
-            </button>
+                <button type="button" onclick="login()" class="ui-btn">
+                    <i class="fas fa-sign-in-alt"></i>Đăng nhập
+                </button>
 
-            <div style="text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px;">
-                <p>Chưa có tài khoản? <a href="#" onclick="showSignup()" style="color: #2563eb; text-decoration: none;">Đăng ký tại đây</a></p>
+                <p class="ui-subtitle switch-line">Chưa có tài khoản? <a href="#" class="ui-link" onclick="showSignup()">Đăng ký tại đây</a></p>
             </div>
         </div>
 
-        <!-- Signup Form -->
-        <div id="signupForm" class="card" style="display: none;">
-            <div class="header">
-                <h1><i class="fas fa-user-plus mr-2"></i>Tạo tài khoản Admin</h1>
-                <p>Đăng ký để quản lý danh thiếp</p>
+        <!-- Đăng ký -->
+        <div id="signupForm" class="ui-container" style="display: none;">
+            <div class="ui-card">
+                <h1 class="ui-title"><i class="fas fa-user-plus"></i>Tạo tài khoản Admin</h1>
+                <p class="ui-subtitle">Đăng ký để quản lý danh thiếp</p>
+
+                <div id="signupError" class="error-message"></div>
+
+                <div class="ui-field">
+                    <input type="email" id="signupEmail" class="ui-input" placeholder=" " autocomplete="username">
+                    <label for="signupEmail" class="ui-label">Email</label>
+                </div>
+                <div class="ui-field">
+                    <input type="password" id="signupPassword" class="ui-input" placeholder=" " autocomplete="new-password">
+                    <label for="signupPassword" class="ui-label">Mật khẩu (tối thiểu 6 ký tự)</label>
+                </div>
+
+                <button type="button" onclick="signup()" class="ui-btn">
+                    <i class="fas fa-user-plus"></i>Đăng ký
+                </button>
+                <button type="button" onclick="showLogin()" class="ui-btn ui-btn--ghost">
+                    <i class="fas fa-arrow-left"></i>Quay lại Đăng nhập
+                </button>
             </div>
-
-            <div id="signupError" class="error-message"></div>
-
-            <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" id="signupEmail" class="form-input" placeholder="admin@example.com">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Mật khẩu (tối thiểu 6 ký tự)</label>
-                <input type="password" id="signupPassword" class="form-input" placeholder="••••••••">
-            </div>
-
-            <button onclick="signup()" class="btn btn-primary">
-                <i class="fas fa-user-plus mr-2"></i>Đăng ký
-            </button>
-
-            <button onclick="showLogin()" class="btn btn-secondary" style="margin-top: 10px;">
-                <i class="fas fa-arrow-left mr-2"></i>Quay lại Đăng nhập
-            </button>
         </div>
 
-        <!-- Admin Panel -->
-        <div id="adminPanel" class="card admin-panel">
-            <div class="header">
-                <h1><i class="fas fa-cog mr-2"></i>Quản lý Danh thiếp</h1>
-                <p id="userEmail" style="color: #2563eb; font-weight: 600;"></p>
-            </div>
+        <!-- Bảng quản trị -->
+        <div id="adminPanel" class="ui-container ui-container--wide admin-panel">
+            <div class="ui-card">
+                <h1 class="ui-title"><i class="fas fa-cog"></i>Quản lý Danh thiếp</h1>
+                <p id="userEmail" class="ui-subtitle header-sub"></p>
 
-            <div id="successMessage" class="success-message">
-                <i class="fas fa-check-circle mr-2"></i>Cập nhật thành công!
-            </div>
-
-            <div id="adminError" class="error-message"></div>
-
-            <!-- Profile Preview -->
-            <div class="profile-preview">
-                <img id="previewImg" src="" alt="Ảnh đại diện xem trước" loading="lazy" decoding="async" style="display: none;">
-                <i id="previewIcon" class="fas fa-user" style="font-size: 48px; color: #d1d5db;"></i>
-                <div class="preview-details">
-                    <p id="previewName">Tên của bạn</p>
-                    <p id="previewPhone"></p>
-                </div>
-            </div>
-
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('personal')">
-                    <i class="fas fa-user mr-2"></i>Thông tin
-                </button>
-                <button class="tab-btn" onclick="switchTab('social')">
-                    <i class="fas fa-share-alt mr-2"></i>Mạng xã hội
-                </button>
-                <button class="tab-btn" onclick="switchTab('image')">
-                    <i class="fas fa-image mr-2"></i>Ảnh đại diện
-                </button>
-                <button class="tab-btn" onclick="switchTab('theme')">
-                    <i class="fas fa-palette mr-2"></i>Giao diện
-                </button>
-            </div>
-
-            <!-- Tab: Personal Info -->
-            <div id="personalTab" class="tab-content active">
-                <div class="form-group">
-                    <label class="form-label">Họ và tên</label>
-                    <input type="text" id="fullName" class="form-input" placeholder="Trần Đức Tiền">
+                <div id="successMessage" class="success-message">
+                    <i class="fas fa-check-circle" style="margin-right: 8px;"></i>Cập nhật thành công!
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Số điện thoại</label>
-                    <input type="tel" id="phone" class="form-input" placeholder="+84396558306">
+                <div id="adminError" class="error-message"></div>
+
+                <!-- Xem trước hồ sơ -->
+                <div class="profile-preview">
+                    <img id="previewImg" src="" alt="Ảnh đại diện xem trước" loading="lazy" decoding="async" style="display: none;">
+                    <i id="previewIcon" class="fas fa-user"></i>
+                    <div class="preview-details">
+                        <p id="previewName">Tên của bạn</p>
+                        <p id="previewPhone"></p>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" id="email" class="form-input" placeholder="hierductien@gmail.com">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button type="button" class="tab-btn active" onclick="switchTab('personal')">
+                        <i class="fas fa-user"></i>Thông tin
+                    </button>
+                    <button type="button" class="tab-btn" onclick="switchTab('social')">
+                        <i class="fas fa-share-alt"></i>Mạng xã hội
+                    </button>
+                    <button type="button" class="tab-btn" onclick="switchTab('image')">
+                        <i class="fas fa-image"></i>Ảnh đại diện
+                    </button>
+                    <button type="button" class="tab-btn" onclick="switchTab('theme')">
+                        <i class="fas fa-palette"></i>Giao diện
+                    </button>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Tên Zalo</label>
-                    <input type="text" id="zaloName" class="form-input" placeholder="Trần Đức Tiền">
-                </div>
-            </div>
-
-            <!-- Tab: Social Links -->
-            <div id="socialTab" class="tab-content">
-                <div class="form-group">
-                    <label class="form-label">Link Zalo</label>
-                    <input type="url" id="zaloLink" class="form-input" placeholder="https://zalo.me/0396558306">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Username Facebook</label>
-                    <input type="text" id="facebookUsername" class="form-input" placeholder="tranductien2006">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Link Facebook</label>
-                    <input type="url" id="facebookLink" class="form-input" placeholder="https://facebook.com/tranductien2006">
-                </div>
-            </div>
-
-            <!-- Tab: Profile Image -->
-            <div id="imageTab" class="tab-content">
-                <div class="form-group">
-                    <label class="form-label">URL Ảnh đại diện</label>
-                    <input type="url" id="profileImage" class="form-input" placeholder="https://example.com/image.jpg">
+                <!-- Tab: Thông tin cá nhân -->
+                <div id="personalTab" class="tab-content active">
+                    <div class="ui-field">
+                        <input type="text" id="fullName" class="ui-input" placeholder=" " autocomplete="name">
+                        <label for="fullName" class="ui-label">Họ và tên</label>
+                    </div>
+                    <div class="ui-field">
+                        <input type="tel" id="phone" class="ui-input" placeholder=" " autocomplete="tel">
+                        <label for="phone" class="ui-label">Số điện thoại</label>
+                    </div>
+                    <div class="ui-field">
+                        <input type="email" id="email" class="ui-input" placeholder=" " autocomplete="email">
+                        <label for="email" class="ui-label">Email</label>
+                    </div>
+                    <div class="ui-field">
+                        <input type="text" id="zaloName" class="ui-input" placeholder=" ">
+                        <label for="zaloName" class="ui-label">Tên Zalo</label>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Hoặc tải ảnh lên</label>
+                <!-- Tab: Mạng xã hội -->
+                <div id="socialTab" class="tab-content">
+                    <div class="ui-field">
+                        <input type="url" id="zaloLink" class="ui-input" placeholder=" ">
+                        <label for="zaloLink" class="ui-label">Link Zalo</label>
+                    </div>
+                    <div class="ui-field">
+                        <input type="text" id="facebookUsername" class="ui-input" placeholder=" ">
+                        <label for="facebookUsername" class="ui-label">Username Facebook</label>
+                    </div>
+                    <div class="ui-field">
+                        <input type="url" id="facebookLink" class="ui-input" placeholder=" ">
+                        <label for="facebookLink" class="ui-label">Link Facebook</label>
+                    </div>
+                </div>
+
+                <!-- Tab: Ảnh đại diện -->
+                <div id="imageTab" class="tab-content">
+                    <div class="ui-field">
+                        <input type="url" id="profileImage" class="ui-input" placeholder=" ">
+                        <label for="profileImage" class="ui-label">URL Ảnh đại diện</label>
+                    </div>
+
+                    <p class="field-caption">Hoặc tải ảnh lên</p>
                     <label for="imageFile" class="file-picker">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <span>Chọn ảnh từ thiết bị</span>
                     </label>
                     <input type="file" id="imageFile" class="file-input" accept="image/*" onchange="previewImage()">
-                    <p id="uploadStatus" style="font-size: 12px; color: #6b7280; margin-top: 8px; line-height: 1.5;">
-                        <i class="fas fa-cloud-upload-alt mr-1"></i>Sẵn sàng tải ảnh
+                    <p id="uploadStatus" class="upload-status">
+                        <i class="fas fa-cloud-upload-alt"></i>Sẵn sàng tải ảnh
                     </p>
                 </div>
-            </div>
 
-            <!-- Tab: Theme -->
-            <div id="themeTab" class="tab-content">
-                <div class="form-group">
-                    <label class="form-label">Chọn giao diện danh thiếp</label>
+                <!-- Tab: Giao diện danh thiếp -->
+                <div id="themeTab" class="tab-content">
+                    <p class="field-caption">Chọn giao diện danh thiếp</p>
                     <div class="theme-options">
                         <label class="theme-option" data-theme-option="professional">
                             <input type="radio" name="theme" value="professional" onchange="selectTheme('professional')">
                             <span class="theme-swatch professional"></span>
-                            <span><strong>Professional</strong><br><small>Đen / trắng lịch lãm</small></span>
+                            <span><strong>Professional</strong><br><small>Xanh trời lịch lãm</small></span>
                         </label>
                         <label class="theme-option" data-theme-option="creative">
                             <input type="radio" name="theme" value="creative" onchange="selectTheme('creative')">
                             <span class="theme-swatch creative"></span>
-                            <span><strong>Creative</strong><br><small>Hồng cam năng động</small></span>
+                            <span><strong>Creative</strong><br><small>Hồng năng động</small></span>
                         </label>
                         <label class="theme-option" data-theme-option="ocean">
                             <input type="radio" name="theme" value="ocean" onchange="selectTheme('ocean')">
                             <span class="theme-swatch ocean"></span>
-                            <span><strong>Ocean</strong><br><small>Xanh cyan hiện đại</small></span>
+                            <span><strong>Ocean</strong><br><small>Xanh ngọc hiện đại</small></span>
                         </label>
                     </div>
                 </div>
-            </div>
 
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button onclick="updateProfile()" class="btn btn-primary">
-                    <i class="fas fa-save mr-2"></i>Cập nhật
-                </button>
-
-                <button onclick="logout()" class="btn btn-danger">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Đăng xuất
-                </button>
+                <!-- Hành động -->
+                <div class="action-buttons">
+                    <button type="button" onclick="updateProfile()" class="ui-btn">
+                        <i class="fas fa-save"></i>Cập nhật
+                    </button>
+                    <button type="button" onclick="logout()" class="ui-btn ui-btn--ghost ui-btn--danger">
+                        <i class="fas fa-sign-out-alt"></i>Đăng xuất
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Loading State -->
-        <div id="loading" class="card" style="display: none;">
-            <div class="loading">
-                <i class="fas fa-spinner fa-spin mr-2"></i>Đang tải...
+        <!-- Đang tải -->
+        <div id="loading" style="display: none;">
+            <div class="ui-card ui-card--flat loading">
+                <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>Đang tải...
             </div>
         </div>
     </div>
@@ -717,7 +574,7 @@
             const status = document.getElementById('uploadStatus');
             if (!status) return;
             status.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-cloud-upload-alt'} mr-1"></i>${message}`;
-            status.style.color = isError ? '#dc2626' : '#6b7280';
+            status.style.color = isError ? 'var(--ui-danger)' : 'var(--ui-text-sub)';
         }
 
         function uploadProfileImage(file) {
