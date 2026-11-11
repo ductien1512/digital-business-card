@@ -282,3 +282,68 @@ button.ui-btn {
 }
 button.ui-btn--ghost { background: transparent; }
 button.ui-btn:hover  { background: var(--ui-glow); }
+
+/* 8. DỊU VIỀN SÁNG + CHỐNG TRÀN LƯỚI -----------------------------------------
+   - Vòng sáng chỉ vẽ ở phần viền (mask), không còn lọt qua mặt kính thành vệt sáng lớn.
+   - Cung sáng ngắn hơn, mờ hơn, quay chậm hơn để dễ nhìn lâu.
+   - minmax(0,1fr): nội dung rộng (hàng tab cuộn ngang) không đẩy khung lệch khỏi giữa trang. */
+:root { --ui-ring: 2px; }
+.ui-page { grid-template-columns: minmax(0, 1fr); }
+.ui-container {
+  background: none;
+  animation: none;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.2),
+    0 20px 25px -5px rgb(var(--ui-glow-rgb) / 0.06),
+    0 25px 50px -12px rgb(0 0 0 / 0.5);
+}
+.ui-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--ui-ring);
+  pointer-events: none;
+  background:
+    conic-gradient(from var(--ui-angle), transparent 0 60%, rgb(var(--ui-glow-rgb) / .5) 85%, transparent 100%),
+    linear-gradient(rgb(255 255 255 / .08), rgb(255 255 255 / .08));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: ui-spin 10s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .ui-container::before { animation: none; } }
+
+/* 8. ĐIỀU CHỈNH SAU KHI THỬ TRÊN ĐIỆN THOẠI ---------------------------------
+   a) Cột lưới có thể bị nội dung "nowrap" (thanh tab) đẩy rộng hơn màn hình -> khung lệch phải. */
+.ui-page { grid-template-columns: minmax(0, 1fr); }
+
+/* b) Viền sáng dịu hơn. Trước đây nền conic-gradient phủ cả khối nên ánh sáng xuyên qua
+      lớp kính tạo vệt sáng lớn trong thẻ. Giờ chỉ vẽ đúng phần viền (mask), cung sáng ngắn,
+      mờ dần, quay chậm. Muốn sáng hơn: tăng .5 ở --ui-ring-peak; nhanh hơn: giảm 18s. */
+:root { --ui-ring: 2px; --ui-ring-peak: .5; }
+.ui-container {
+  background: none;
+  animation: none;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / .2),
+    0 20px 25px -5px rgb(var(--ui-glow-rgb) / .06),
+    0 25px 50px -12px rgb(0 0 0 / .5);
+}
+.ui-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  padding: var(--ui-ring);
+  pointer-events: none;
+  background:
+    conic-gradient(from var(--ui-angle), transparent 0 55%, rgb(var(--ui-glow-rgb) / var(--ui-ring-peak)) 88%, transparent 100%),
+    rgb(255 255 255 / .08);           /* viền tĩnh rất nhạt để giữ khung khi cung sáng đã đi qua */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: ui-spin 18s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .ui-container::before { animation: none; } }
