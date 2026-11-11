@@ -160,6 +160,9 @@
         .form-heading { margin: 0 0 6px; font-size: 18px; font-weight: 700; color: var(--ui-text); }
         .form-heading i { margin-right: 8px; color: var(--ui-glow); }
         .form-desc { margin: 0 0 34px; font-size: 13px; color: var(--ui-text-sub); }
+        /* Điện thoại + Email cùng hàng: mỗi ô có gạch chân riêng, cách nhau 22px */
+        .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 22px; }
+        .field-row .ui-label { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .success-message {
             display: none; margin-top: 16px; padding: 14px 16px; text-align: center; font-weight: 600;
             color: var(--ui-success); border-radius: var(--ui-radius-ctl);
@@ -321,13 +324,15 @@
                             <input type="text" id="lead-name" name="name" required class="ui-input" placeholder=" " autocomplete="name">
                             <label for="lead-name" class="ui-label" data-lang="label-name">Họ và tên *</label>
                         </div>
-                        <div class="ui-field">
-                            <input type="tel" id="lead-phone" name="phone" required class="ui-input" placeholder=" " autocomplete="tel">
-                            <label for="lead-phone" class="ui-label" data-lang="label-phone">Số điện thoại *</label>
-                        </div>
-                        <div class="ui-field">
-                            <input type="email" id="lead-email" name="email" required class="ui-input" placeholder=" " autocomplete="email">
-                            <label for="lead-email" class="ui-label" data-lang="label-email">Email *</label>
+                        <div class="field-row">
+                            <div class="ui-field">
+                                <input type="tel" id="lead-phone" name="phone" required class="ui-input" placeholder=" " autocomplete="tel">
+                                <label for="lead-phone" class="ui-label" data-lang="label-phone">Số điện thoại *</label>
+                            </div>
+                            <div class="ui-field">
+                                <input type="email" id="lead-email" name="email" required class="ui-input" placeholder=" " autocomplete="email">
+                                <label for="lead-email" class="ui-label" data-lang="label-email">Email *</label>
+                            </div>
                         </div>
                         <div class="ui-field">
                             <input type="text" id="lead-company" name="company" class="ui-input" placeholder=" " autocomplete="organization">
