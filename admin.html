@@ -4,19 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Digital Business Card</title>
-    <script src="assets/tailwindcss.js"></script>
     <link rel="stylesheet" href="assets/fontawesome.min.css">
     <link rel="stylesheet" href="assets/inter.css">
     <!-- Firebase SDK -->
     <script src="assets/firebase-app-compat.js"></script>
     <script src="assets/firebase-database-compat.js"></script>
     <script src="assets/firebase-auth-compat.js"></script>
+    <!-- Chế độ sáng/tối: nạp sớm để không bị nháy màu -->
+    <script src="assets/ui-mode.js"></script>
     <!-- Phong cách Ultimate UI 3-in-1 (Neo-Glass + Floating Label + Liquid Gradient) -->
     <link rel="stylesheet" href="assets/ultimate-ui.css">
     <style>
         /* Bố cục riêng của trang admin. Màu sắc/hiệu ứng lõi nằm trong assets/ultimate-ui.css */
-        .admin-shell { width: min(100%, 720px); display: grid; justify-items: center; gap: 16px; }
-        .admin-shell > .ui-container { max-width: 100%; }
+        .admin-shell {
+            width: min(100%, 720px); max-width: 100%; min-width: 0;
+            display: grid; grid-template-columns: minmax(0, 1fr);   /* không để nội dung đẩy rộng quá màn hình */
+            justify-items: center; gap: 16px;
+        }
+        .admin-shell > .ui-container { max-width: 100%; min-width: 0; }
+        .tabs { min-width: 0; max-width: 100%; }
         .admin-shell > .error-message { width: min(100%, 420px); }
         .admin-panel { display: none; }              /* JS bật bằng style.display = 'block' */
 
@@ -26,7 +32,7 @@
         .switch-line { margin: 22px 0 0; text-align: center; }
         .ui-btn--danger { color: var(--ui-danger); border-color: color-mix(in srgb, var(--ui-danger) 45%, transparent); }
         .ui-btn--danger:hover {
-            background: var(--ui-danger); color: #0f172a; border-color: transparent;
+            background: var(--ui-danger); color: var(--ui-on-glow); border-color: transparent;
             box-shadow: 0 0 20px color-mix(in srgb, var(--ui-danger) 55%, transparent);
         }
         button.ui-btn--danger:hover { background: var(--ui-danger); }
@@ -39,7 +45,7 @@
         .error-message {
             color: var(--ui-danger);
             border: 1px solid color-mix(in srgb, var(--ui-danger) 45%, transparent);
-            background: color-mix(in srgb, var(--ui-danger) 10%, rgb(15 23 42 / .85));
+            background: color-mix(in srgb, var(--ui-danger) 10%, var(--ui-popover-bg));
         }
         .success-message {
             color: var(--ui-success);
@@ -53,8 +59,8 @@
         .profile-preview {
             display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding: 14px 16px;
             border-radius: 16px;
-            background: rgb(255 255 255 / .04);
-            border: 1px solid rgb(255 255 255 / .08);
+            background: var(--ui-surface);
+            border: 1px solid var(--ui-border);
         }
         .profile-preview img {
             flex: 0 0 76px; width: 76px; height: 76px; border-radius: 50%; object-fit: cover; margin: 0;
@@ -69,7 +75,7 @@
 
         /* Tab: gạch chân sáng theo màu theme */
         .tabs {
-            display: flex; gap: 6px; margin-bottom: 30px; overflow-x: auto;
+            min-width: 0; display: flex; gap: 6px; margin-bottom: 30px; overflow-x: auto;
             border-bottom: 2px solid var(--ui-line);
             overscroll-behavior-x: contain; scrollbar-width: thin; -webkit-overflow-scrolling: touch;
         }
@@ -106,8 +112,8 @@
         .theme-options { display: grid; gap: 12px; }
         .theme-option {
             display: flex; align-items: center; gap: 12px; padding: 14px; cursor: pointer;
-            border: 1px solid rgb(255 255 255 / .10); border-radius: 16px;
-            background: rgb(255 255 255 / .04);
+            border: 1px solid var(--ui-border); border-radius: 16px;
+            background: var(--ui-surface);
             transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
         }
         .theme-option input { accent-color: var(--ui-glow); }
@@ -123,12 +129,12 @@
         .theme-swatch.ocean        { background: linear-gradient(135deg, rgb(52 211 153), rgb(4 120 87)); }
 
         /* Thanh hành động */
-        .action-buttons { display: grid; grid-template-columns: minmax(0, 1fr) minmax(110px, .42fr); gap: 10px; margin-top: 22px; }
-        .action-buttons .ui-btn { margin: 0; }
+        .action-buttons { display: grid; grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); gap: 10px; margin-top: 22px; }   /* Cập nhật : Đăng xuất = 2.5 : 1 */
+        .action-buttons .ui-btn { margin: 0; padding-inline: 10px; white-space: nowrap; }
         @media (min-width: 641px) {
             .action-buttons {
                 position: sticky; bottom: 16px; z-index: 5; padding-top: 14px;
-                background: linear-gradient(to top, rgb(15 23 42 / .55), transparent);
+                background: linear-gradient(to top, color-mix(in srgb, var(--ui-bg-1) 70%, transparent), transparent);
             }
         }
 
@@ -140,23 +146,33 @@
             .profile-preview > i { font-size: 34px; line-height: 64px; }
             .profile-preview #previewName { font-size: 15px; }
             .profile-preview #previewPhone { font-size: 12px; }
-            .tabs { margin: 0 -4px 26px; padding: 0 4px; }
-            .tab-btn { min-width: 92px; min-height: 44px; padding: 9px 10px; font-size: 12px; }
+            .tabs { margin: 0 0 26px; }
+            .tab-btn { flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 9px 6px; font-size: 12px; }
+            .tab-btn i { display: none; }               /* nhường chỗ để cả 4 tab hiện đủ */
             .theme-option { min-width: 0; padding: 12px 10px; }
-            .action-buttons { grid-template-columns: 1fr 108px; gap: 8px; margin-top: 18px; }
-            .action-buttons .ui-btn { padding: 11px 8px; font-size: 13px; }
+            .action-buttons { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 8px; margin-top: 18px; }   /* 2 : 1 */
+            .action-buttons .ui-btn { padding: 11px 6px; font-size: 13px; }
+            .action-buttons .ui-btn i { margin-right: 6px; }
         }
         @media (prefers-reduced-motion: reduce) {
             .tab-btn, .file-picker, .theme-option { transition: none; }
         }
     </style>
 </head>
-<body class="ui-page">
+<body class="ui-page ui-page--topbar">
+    <!-- Góc phải: sáng/tối (logic ở assets/ui-mode.js, dùng chung với index.html) -->
+    <div class="ui-topbar">
+        <button type="button" class="ui-mode-toggle" data-mode-toggle aria-pressed="true" title="Chuyển sang giao diện sáng" aria-label="Chuyển sang giao diện sáng">
+            <i class="fas fa-sun" aria-hidden="true"></i>
+            <i class="fas fa-moon" aria-hidden="true"></i>
+        </button>
+    </div>
+
     <div class="admin-shell">
         <div id="firebaseConfigError" class="error-message" style="display: none;"></div>
 
         <!-- Đăng nhập -->
-        <div id="authForm" class="ui-container auth-form">
+        <div id="authForm" class="ui-container">
             <div class="ui-card">
                 <h1 class="ui-title"><i class="fas fa-lock"></i>Đăng nhập Admin</h1>
                 <p class="ui-subtitle">Quản lý thông tin danh thiếp của bạn</p>
@@ -230,16 +246,16 @@
 
                 <!-- Tabs -->
                 <div class="tabs">
-                    <button type="button" class="tab-btn active" onclick="switchTab('personal')">
+                    <button type="button" class="tab-btn active" onclick="switchTab('personal', this)">
                         <i class="fas fa-user"></i>Thông tin
                     </button>
-                    <button type="button" class="tab-btn" onclick="switchTab('social')">
+                    <button type="button" class="tab-btn" onclick="switchTab('social', this)">
                         <i class="fas fa-share-alt"></i>Mạng xã hội
                     </button>
-                    <button type="button" class="tab-btn" onclick="switchTab('image')">
+                    <button type="button" class="tab-btn" onclick="switchTab('image', this)">
                         <i class="fas fa-image"></i>Ảnh đại diện
                     </button>
-                    <button type="button" class="tab-btn" onclick="switchTab('theme')">
+                    <button type="button" class="tab-btn" onclick="switchTab('theme', this)">
                         <i class="fas fa-palette"></i>Giao diện
                     </button>
                 </div>
@@ -607,7 +623,7 @@
                 try { result = JSON.parse(xhr.responseText || '{}'); } catch (error) {}
                 if (xhr.status >= 200 && xhr.status < 300 && result.secure_url) {
                     document.getElementById('profileImage').value = result.secure_url;
-                    setUploadStatus('Đã tải ảnh thành công. Bấm “Cập nhật thông tin” để lưu.');
+                    setUploadStatus('Đã tải ảnh thành công. Bấm “Cập nhật” để lưu.');
                 } else {
                     setUploadStatus(`Cloudinary từ chối ảnh: ${result.error?.message || `HTTP ${xhr.status}`}`, true);
                 }
@@ -620,14 +636,14 @@
         }
 
         // Tab switching
-        function switchTab(tab) {
+        function switchTab(tab, button) {
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
             // Show selected tab
             document.getElementById(tab + 'Tab').classList.add('active');
-            event.target.classList.add('active');
+            button?.classList.add('active');
         }
 
         // Show/Hide forms
@@ -662,7 +678,7 @@
 
         // Allow Enter key for login
         document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.target.closest('button, a')) {
                 if (document.getElementById('authForm').style.display !== 'none') {
                     login();
                 } else if (document.getElementById('signupForm').style.display !== 'none') {

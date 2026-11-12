@@ -12,7 +12,6 @@
       gtag('js', new Date());
       gtag('config', 'G-541399676');
     </script>
-    <script src="assets/tailwindcss.js"></script>
     <link rel="stylesheet" href="assets/fontawesome.min.css">
     <link rel="stylesheet" href="assets/inter.css">
     <!-- Animate.css: hiệu ứng xuất hiện nhẹ, tối ưu cho mobile -->
@@ -21,32 +20,27 @@
     <!-- Firebase SDK -->
     <script src="assets/firebase-app-compat.js"></script>
     <script src="assets/firebase-database-compat.js"></script>
-    <script src="assets/firebase-auth-compat.js"></script>
+    <!-- Chế độ sáng/tối: nạp sớm để không bị nháy màu -->
+    <script src="assets/ui-mode.js"></script>
     <!-- Phong cách Ultimate UI 3-in-1 (Neo-Glass + Floating Label + Liquid Gradient) -->
     <link rel="stylesheet" href="assets/ultimate-ui.css">
     <style>
-        /* Bố cục riêng của danh thiếp. Màu sắc/hiệu ứng lõi nằm trong assets/ultimate-ui.css */
-        body.ui-page { padding-top: 64px; }
+        /* Bố cục riêng của danh thiếp. Màu sắc, viền chạy, chế độ sáng/tối nằm trong assets/ultimate-ui.css */
+        .hidden { display: none; }                  /* JS bật/tắt khung QR bằng class này */
         #card-container { width: min(100%, 420px); }
         #card-container .ui-container { width: 100%; }
         #card-container .ui-card { padding: 36px 24px 32px; }
-        @media (max-width: 420px) {
-            body.ui-page { padding: 64px 12px 16px; }
-            #card-container .ui-card { padding: 32px 18px 28px; }
-        }
+        @media (max-width: 420px) { #card-container .ui-card { padding: 32px 18px 28px; } }
 
-        /* Chuyển ngôn ngữ: viên thuốc kính ở góc phải */
+        /* Chuyển ngôn ngữ: viên thuốc kính cạnh nút sáng/tối */
         .lang-toggle {
-            position: fixed; top: 16px; right: 16px; z-index: 1000;
-            display: flex; align-items: center; gap: 8px;
-            padding: 6px 14px; border-radius: 999px;
-            font-size: 12px; font-weight: 800;
-            background: var(--ui-glass-bg);
-            border: 1px solid rgb(255 255 255 / .10);
+            display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; box-sizing: border-box;
+            border-radius: 999px; font-size: 12px; font-weight: 800;
+            background: var(--ui-glass-bg); border: 1px solid var(--ui-border);
             -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
             box-shadow: 0 8px 24px -8px rgb(0 0 0 / .5);
         }
-        .lang-btn { cursor: pointer; color: var(--ui-text-sub); font: inherit; transition: color .3s ease; }
+        .lang-btn { padding: 0; cursor: pointer; color: var(--ui-text-sub); font: inherit; transition: color .3s ease; }
         .lang-btn:hover { color: var(--ui-text); }
         .lang-btn.active { color: var(--ui-glow); }
         .lang-btn:focus-visible { outline: 2px solid var(--ui-glow); outline-offset: 3px; border-radius: 4px; }
@@ -58,14 +52,13 @@
             width: 104px; height: 104px; margin: 0 auto 18px;
             border-radius: 50%; overflow: hidden;
             display: flex; align-items: center; justify-content: center;
-            background: rgb(255 255 255 / .06);
-            border: 3px solid rgb(var(--ui-glow-rgb) / .65);
-            box-shadow: 0 0 0 6px rgb(var(--ui-glow-rgb) / .12),
-                        0 12px 30px -8px rgb(var(--ui-glow-rgb) / .45);
+            background: var(--ui-surface);
+            border: 3px solid rgb(var(--ui-glow-rgb) / .6);
+            box-shadow: 0 0 0 6px rgb(var(--ui-glow-rgb) / .10), 0 12px 30px -8px rgb(var(--ui-glow-rgb) / .35);
         }
         .profile-img-container::before {
             content: ""; position: absolute; inset: 0; z-index: 0; border-radius: 50%;
-            background: linear-gradient(110deg, rgb(255 255 255 / .05) 25%, rgb(255 255 255 / .16) 37%, rgb(255 255 255 / .05) 63%);
+            background: linear-gradient(110deg, var(--ui-surface) 25%, var(--ui-border) 37%, var(--ui-surface) 63%);
             background-size: 200% 100%;
             animation: profileSkeleton 1.2s ease-in-out infinite;
         }
@@ -83,18 +76,14 @@
         /* Tên + chức danh */
         .profile-head { text-align: center; margin-bottom: 28px; }
         .profile-head .ui-title { margin-bottom: 6px; font-size: 28px; }
-        .profile-role {
-            margin: 0; font-size: 13px; font-weight: 600;
-            letter-spacing: .12em; text-transform: uppercase; color: var(--ui-glow);
-        }
+        .profile-role { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ui-glow); }
 
         /* Danh sách liên hệ: hàng kính phẳng (không backdrop-filter để nhẹ máy) */
         .contact-list { display: grid; gap: 10px; }
         .contact-item {
             display: flex; align-items: center; min-width: 0;
             padding: 10px 12px; border-radius: 16px; cursor: pointer;
-            background: rgb(255 255 255 / .04);
-            border: 1px solid rgb(255 255 255 / .08);
+            background: var(--ui-surface); border: 1px solid var(--ui-border);
             transition: transform .2s ease, border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
         }
         .contact-item:hover {
@@ -106,18 +95,11 @@
         .contact-icon {
             flex: 0 0 40px; width: 40px; height: 40px; margin-right: 12px;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 12px; color: var(--ui-glow);
-            background: rgb(var(--ui-glow-rgb) / .14);
+            border-radius: 12px; color: var(--ui-glow); background: rgb(var(--ui-glow-rgb) / .14);
         }
         .contact-content { flex: 1 1 auto; min-width: 0; overflow: hidden; }
-        .contact-label {
-            margin: 0; font-size: 11px; font-weight: 600;
-            letter-spacing: .08em; text-transform: uppercase; color: var(--ui-text-sub);
-        }
-        .contact-value {
-            margin: 0; font-weight: 500; color: var(--ui-text);
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-        }
+        .contact-label { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-text-sub); }
+        .contact-value { margin: 0; font-weight: 500; color: var(--ui-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .contact-actions { display: flex; align-items: center; flex: 0 0 auto; gap: 4px; margin-left: 10px; opacity: .8; transition: opacity .2s ease; }
         .contact-item:hover .contact-actions, .contact-item:focus-within .contact-actions { opacity: 1; }
         .contact-action {
@@ -129,13 +111,13 @@
         .contact-action:active { transform: scale(.92); }
         .contact-action:focus-visible { outline: 2px solid var(--ui-glow); outline-offset: 2px; }
 
-        /* QR: nền trắng được giữ lại để máy quét đọc tốt */
+        /* QR: nền trắng được giữ lại ở cả hai chế độ để máy quét đọc tốt */
         .qr-section { margin-top: 22px; text-align: center; }
         .qr-section > .ui-btn { margin-top: 0; }
         .qr-panel {
             width: min(100%, 300px); margin: 16px auto 0; padding: 18px;
             background: #ffffff; border-radius: 22px;
-            box-shadow: 0 12px 30px rgb(0 0 0 / .35), 0 0 24px rgb(var(--ui-glow-rgb) / .25);
+            box-shadow: 0 12px 30px rgb(0 0 0 / .3), 0 0 24px rgb(var(--ui-glow-rgb) / .18);
         }
         #qrcode {
             width: 240px; height: 240px; max-width: 100%; margin: 0 auto; padding: 10px;
@@ -156,13 +138,10 @@
         .footer-actions .ui-btn:first-child { flex: 1; }
 
         /* Form để lại thông tin */
-        .contact-form-section { margin-top: 28px; padding-top: 28px; border-top: 1px solid rgb(255 255 255 / .08); }
+        .contact-form-section { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--ui-border); }
         .form-heading { margin: 0 0 6px; font-size: 18px; font-weight: 700; color: var(--ui-text); }
         .form-heading i { margin-right: 8px; color: var(--ui-glow); }
         .form-desc { margin: 0 0 34px; font-size: 13px; color: var(--ui-text-sub); }
-        /* Điện thoại + Email cùng hàng: mỗi ô có gạch chân riêng, cách nhau 22px */
-        .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 22px; }
-        .field-row .ui-label { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .success-message {
             display: none; margin-top: 16px; padding: 14px 16px; text-align: center; font-weight: 600;
             color: var(--ui-success); border-radius: var(--ui-radius-ctl);
@@ -174,10 +153,9 @@
         .copy-toast {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1100;
             padding: 12px 20px; border-radius: 12px; font-size: 14px; color: var(--ui-text);
-            background: rgb(15 23 42 / .92);
-            border: 1px solid rgb(var(--ui-glow-rgb) / .4);
+            background: var(--ui-popover-bg); border: 1px solid rgb(var(--ui-glow-rgb) / .4);
             -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-            box-shadow: 0 0 20px rgb(var(--ui-glow-rgb) / .25);
+            box-shadow: 0 0 20px rgb(var(--ui-glow-rgb) / .2);
             opacity: 0; transition: opacity .3s, bottom .3s; pointer-events: none;
         }
         .firebase-error {
@@ -186,9 +164,9 @@
             font-size: 14px; line-height: 1.5; color: var(--ui-danger);
             border-radius: var(--ui-radius-ctl);
             border: 1px solid color-mix(in srgb, var(--ui-danger) 45%, transparent);
-            background: rgb(15 23 42 / .92);
+            background: var(--ui-popover-bg);
             -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-            box-shadow: 0 8px 24px rgb(0 0 0 / .4);
+            box-shadow: 0 8px 24px rgb(0 0 0 / .3);
         }
         .loading { display: flex; align-items: center; gap: 8px; font-size: 18px; color: var(--ui-text-sub); }
 
@@ -202,12 +180,18 @@
         }
     </style>
 </head>
-<body class="ui-page">
-    <!-- Chuyển ngôn ngữ -->
-    <div class="lang-toggle">
-        <button type="button" id="lang-vi" class="lang-btn active" onclick="setLanguage('vi')">VI</button>
-        <span class="lang-sep">|</span>
-        <button type="button" id="lang-en" class="lang-btn" onclick="setLanguage('en')">EN</button>
+<body class="ui-page ui-page--topbar">
+    <!-- Góc phải: ngôn ngữ + sáng/tối -->
+    <div class="ui-topbar">
+        <div class="lang-toggle">
+            <button type="button" id="lang-vi" class="lang-btn active" onclick="setLanguage('vi')">VI</button>
+            <span class="lang-sep">|</span>
+            <button type="button" id="lang-en" class="lang-btn" onclick="setLanguage('en')">EN</button>
+        </div>
+        <button type="button" class="ui-mode-toggle" data-mode-toggle aria-pressed="true" title="Chuyển sang giao diện sáng" aria-label="Chuyển sang giao diện sáng">
+            <i class="fas fa-sun" aria-hidden="true"></i>
+            <i class="fas fa-moon" aria-hidden="true"></i>
+        </button>
     </div>
 
     <div id="loading" class="loading">
@@ -216,7 +200,7 @@
     <div id="firebaseError" class="firebase-error" role="alert" style="display: none;"></div>
 
     <div id="card-container" style="display: none;">
-        <!-- Một viền sáng quay duy nhất cho toàn bộ danh thiếp -->
+        <!-- Một viền chạy duy nhất cho toàn bộ danh thiếp -->
         <div class="ui-container">
             <div class="ui-card">
                 <!-- Ảnh đại diện -->
@@ -241,10 +225,10 @@
                             <p id="userPhone" class="contact-value">+84396558306</p>
                         </div>
                         <div class="contact-actions">
-                            <a href="" id="callLink" class="contact-action action-btn" aria-label="Gọi điện" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'phone'})">
+                            <a href="" id="callLink" class="contact-action" aria-label="Gọi điện" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'phone'})">
                                 <i class="fas fa-phone-alt"></i>
                             </a>
-                            <a href="" id="smsLink" class="contact-action action-btn" aria-label="Nhắn tin SMS" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'sms'})">
+                            <a href="" id="smsLink" class="contact-action" aria-label="Nhắn tin SMS" onclick="event.stopPropagation(); trackEvent('click_call', {'type': 'sms'})">
                                 <i class="fas fa-comment"></i>
                             </a>
                         </div>
@@ -258,7 +242,7 @@
                             <p id="userZalo" class="contact-value">Trần Đức Tiền</p>
                         </div>
                         <div class="contact-actions">
-                            <a href="" id="zaloLink" target="_blank" rel="noopener" class="contact-action action-btn" aria-label="Mở Zalo" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'zalo'})">
+                            <a href="" id="zaloLink" target="_blank" rel="noopener" class="contact-action" aria-label="Mở Zalo" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'zalo'})">
                                 <i class="fas fa-external-link-alt"></i>
                             </a>
                         </div>
@@ -272,7 +256,7 @@
                             <p id="userEmail" class="contact-value">hierductien@gmail.com</p>
                         </div>
                         <div class="contact-actions">
-                            <a href="" id="emailLink" class="contact-action action-btn" aria-label="Gửi email" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'email'})">
+                            <a href="" id="emailLink" class="contact-action" aria-label="Gửi email" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'email'})">
                                 <i class="fas fa-paper-plane"></i>
                             </a>
                         </div>
@@ -286,7 +270,7 @@
                             <p id="userFacebook" class="contact-value">tranductien2006</p>
                         </div>
                         <div class="contact-actions">
-                            <a href="" id="facebookLink" target="_blank" rel="noopener" class="contact-action action-btn" aria-label="Mở Facebook" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'facebook'})">
+                            <a href="" id="facebookLink" target="_blank" rel="noopener" class="contact-action" aria-label="Mở Facebook" onclick="event.stopPropagation(); trackEvent('click_social', {'platform': 'facebook'})">
                                 <i class="fas fa-external-link-alt"></i>
                             </a>
                         </div>
@@ -314,33 +298,38 @@
                     </button>
                 </div>
 
-                <!-- Form để lại thông tin (nhãn bay + gạch chân Sleek) -->
+                <!-- Form để lại thông tin: nhãn bay + gợi ý nhập mẫu + gạch chân Sleek -->
                 <div class="contact-form-section" data-animate="animate__fadeInUp" style="--animation-delay: 880ms;">
                     <h3 class="form-heading"><i class="fas fa-paper-plane"></i><span data-lang="form-title">Để lại thông tin</span></h3>
                     <p data-lang="form-desc" class="form-desc">Gửi thông tin của bạn để chúng ta có thể kết nối.</p>
 
                     <form id="lead-form" action="https://formspree.io/f/meaawoql" method="POST">
-                        <div class="ui-field">
-                            <input type="text" id="lead-name" name="name" required class="ui-input" placeholder=" " autocomplete="name">
-                            <label for="lead-name" class="ui-label" data-lang="label-name">Họ và tên *</label>
+                        <div class="ui-field ui-field--required">
+                            <input type="text" id="lead-name" name="name" required class="ui-input" placeholder=" " autocomplete="name" aria-describedby="hint-lead-name">
+                            <label for="lead-name" class="ui-label" data-lang="label-name">Tên của bạn</label>
+                            <span id="hint-lead-name" class="ui-hint" data-lang="hint-name">VD: Nguyễn Văn A</span>
                         </div>
-                        <div class="field-row">
-                            <div class="ui-field">
-                                <input type="tel" id="lead-phone" name="phone" required class="ui-input" placeholder=" " autocomplete="tel">
-                                <label for="lead-phone" class="ui-label" data-lang="label-phone">Số điện thoại *</label>
-                            </div>
-                            <div class="ui-field">
-                                <input type="email" id="lead-email" name="email" required class="ui-input" placeholder=" " autocomplete="email">
-                                <label for="lead-email" class="ui-label" data-lang="label-email">Email *</label>
-                            </div>
+                        <div class="ui-row">
+                        <div class="ui-field ui-field--required">
+                            <input type="tel" id="lead-phone" name="phone" required class="ui-input" placeholder=" " autocomplete="tel" aria-describedby="hint-lead-phone">
+                            <label for="lead-phone" class="ui-label" data-lang="label-phone">SĐT của bạn</label>
+                            <span id="hint-lead-phone" class="ui-hint" data-lang="hint-phone">090 123 4567</span>
+                        </div>
+                        <div class="ui-field ui-field--required">
+                            <input type="email" id="lead-email" name="email" required class="ui-input" placeholder=" " autocomplete="email" aria-describedby="hint-lead-email">
+                            <label for="lead-email" class="ui-label" data-lang="label-email">Email của bạn</label>
+                            <span id="hint-lead-email" class="ui-hint" data-lang="hint-email">ban@email.com</span>
+                        </div>
                         </div>
                         <div class="ui-field">
-                            <input type="text" id="lead-company" name="company" class="ui-input" placeholder=" " autocomplete="organization">
-                            <label for="lead-company" class="ui-label" data-lang="label-company">Công ty (không bắt buộc)</label>
+                            <input type="text" id="lead-company" name="company" class="ui-input" placeholder=" " autocomplete="organization" aria-describedby="hint-lead-company">
+                            <label for="lead-company" class="ui-label" data-lang="label-company">Công ty của bạn (không bắt buộc)</label>
+                            <span id="hint-lead-company" class="ui-hint" data-lang="hint-company">Bạn đang làm việc ở đâu?</span>
                         </div>
                         <div class="ui-field">
-                            <textarea id="lead-message" name="message" rows="3" class="ui-textarea" placeholder=" "></textarea>
-                            <label for="lead-message" class="ui-label" data-lang="label-message">Lời nhắn</label>
+                            <textarea id="lead-message" name="message" rows="3" class="ui-textarea" placeholder=" " aria-describedby="hint-lead-message"></textarea>
+                            <label for="lead-message" class="ui-label" data-lang="label-message">Lời nhắn của bạn</label>
+                            <span id="hint-lead-message" class="ui-hint" data-lang="hint-message">Bạn muốn trao đổi điều gì với mình?</span>
                         </div>
 
                         <button type="submit" id="submit-button" class="ui-btn" data-lang="submit-btn">Gửi thông tin</button>
@@ -421,18 +410,19 @@
                 'vcard-btn': 'Lưu vào danh bạ',
                 'form-title': 'Để lại thông tin',
                 'form-desc': 'Gửi thông tin của bạn để chúng ta có thể kết nối.',
-                'label-name': 'Họ và tên *',
-                'label-phone': 'Số điện thoại *',
-                'label-email': 'Email *',
-                'label-company': 'Công ty (không bắt buộc)',
-                'label-message': 'Lời nhắn',
+                // Nhãn nói rõ "của bạn" (người điền); hint-* là gợi ý hiện khi đang chọn ô còn trống
+                'label-name': 'Tên của bạn',
+                'label-phone': 'SĐT của bạn',
+                'label-email': 'Email của bạn',
+                'label-company': 'Công ty của bạn (không bắt buộc)',
+                'label-message': 'Lời nhắn của bạn',
+                'hint-name': 'VD: Nguyễn Văn A',
+                'hint-phone': '090 123 4567',
+                'hint-email': 'ban@email.com',
+                'hint-company': 'Bạn đang làm việc ở đâu?',
+                'hint-message': 'Bạn muốn trao đổi điều gì với mình?',
                 'submit-btn': 'Gửi thông tin',
-                'success-msg': 'Cảm ơn! Thông tin của bạn đã được gửi thành công.',
-                'ph-name': 'Nguyễn Văn A',
-                'ph-phone': '090...',
-                'ph-email': 'abc@gmail.com',
-                'ph-company': 'Tên công ty của bạn',
-                'ph-message': 'Bạn muốn nhắn gì cho mình không?'
+                'success-msg': 'Cảm ơn! Thông tin của bạn đã được gửi thành công.'
             },
             'en': {
                 'sub-title': 'Digital Business Card',
@@ -445,59 +435,26 @@
                 'vcard-btn': 'Add to Contacts',
                 'form-title': 'Leave your info',
                 'form-desc': 'Send your information so we can connect.',
-                'label-name': 'Full Name *',
-                'label-phone': 'Phone Number *',
-                'label-email': 'Email *',
-                'label-company': 'Company (Optional)',
-                'label-message': 'Message',
+                'label-name': 'Your name',
+                'label-phone': 'Your phone',
+                'label-email': 'Your email',
+                'label-company': 'Your company (optional)',
+                'label-message': 'Your message',
+                'hint-name': 'e.g. Jane Doe',
+                'hint-phone': '090 123 4567',
+                'hint-email': 'you@email.com',
+                'hint-company': 'Where do you work?',
+                'hint-message': 'What would you like to talk about?',
                 'submit-btn': 'Send Info',
-                'success-msg': 'Thank you! Your information has been sent successfully.',
-                'ph-name': 'John Doe',
-                'ph-phone': '090...',
-                'ph-email': 'abc@gmail.com',
-                'ph-company': 'Your company name',
-                'ph-message': 'Anything you want to tell me?'
+                'success-msg': 'Thank you! Your information has been sent successfully.'
             }
         };
-
-        const DARK_MODE_STORAGE_KEY = 'darkMode';
-        const systemDarkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-        function updateDarkModeToggle(isDark) {
-            const toggle = document.getElementById('themeToggle');
-            if (!toggle) return;
-            const label = isDark ? 'Chuyển sang giao diện sáng' : 'Bật giao diện tối';
-            toggle.setAttribute('aria-label', label);
-            toggle.setAttribute('title', label);
-            toggle.setAttribute('aria-pressed', String(isDark));
-        }
-
-        function applyDarkMode(isDark, persist = false) {
-            document.body.classList.toggle('dark-mode', isDark);
-            document.body.classList.add('theme-transition');
-            updateDarkModeToggle(isDark);
-            if (persist) localStorage.setItem(DARK_MODE_STORAGE_KEY, isDark ? 'dark' : 'light');
-        }
-
-        function getInitialDarkMode() {
-            const savedMode = localStorage.getItem(DARK_MODE_STORAGE_KEY);
-            if (savedMode === 'dark') return true;
-            if (savedMode === 'light') return false;
-            return systemDarkModeQuery.matches;
-        }
-
-        function toggleDarkMode() {
-            const nextMode = !document.body.classList.contains('dark-mode');
-            applyDarkMode(nextMode, true);
-            trackEvent('toggle_dark_mode', { mode: nextMode ? 'dark' : 'light', source: 'manual' });
-        }
 
         const THEME_STORAGE_KEY = 'cardTheme';
         const VALID_THEMES = ['professional', 'creative', 'ocean'];
 
         function applyTheme(theme) {
             const selectedTheme = VALID_THEMES.includes(theme) ? theme : 'professional';
-            document.body.classList.add('theme-transition');
             document.body.classList.remove(...VALID_THEMES.map(name => `theme-${name}`));
             if (selectedTheme !== 'professional') document.body.classList.add(`theme-${selectedTheme}`);
             localStorage.setItem(THEME_STORAGE_KEY, selectedTheme);
@@ -574,6 +531,8 @@
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('card-container').style.display = 'block';
                     requestAnimationFrame(playEntranceAnimations);
+                } else {
+                    showOfflineCard();   // chưa có dữ liệu hồ sơ: dùng thông tin mặc định thay vì treo ở "Đang tải"
                 }
             }, (error) => {
                 showFirebaseError(error.message);
@@ -584,7 +543,6 @@
         function trackEvent(eventName, params = {}) {
             if (typeof gtag === 'function') {
                 gtag('event', eventName, params);
-                console.log(`GA4 Event Tracked: ${eventName}`, params);
             }
         }
 
@@ -674,17 +632,13 @@
         // Language management
         function setLanguage(lang) {
             localStorage.setItem('lang', lang);
+            document.documentElement.lang = lang;
             document.getElementById('lang-vi').classList.toggle('active', lang === 'vi');
             document.getElementById('lang-en').classList.toggle('active', lang === 'en');
             
             document.querySelectorAll('[data-lang]').forEach(el => {
                 const key = el.getAttribute('data-lang');
                 if (translations[lang][key]) el.innerText = translations[lang][key];
-            });
-            
-            document.querySelectorAll('[data-placeholder]').forEach(el => {
-                const key = el.getAttribute('data-placeholder');
-                if (translations[lang][key]) el.setAttribute('placeholder', translations[lang][key]);
             });
         }
 
@@ -726,10 +680,8 @@
         });
 
         // Initialize
-        applyDarkMode(getInitialDarkMode());
-        document.getElementById('themeToggle')?.addEventListener('click', toggleDarkMode);
-        systemDarkModeQuery.addEventListener('change', (event) => {
-            if (!localStorage.getItem(DARK_MODE_STORAGE_KEY)) applyDarkMode(event.matches);
+        document.addEventListener('ui:modechange', (event) => {
+            if (event.detail.source === 'manual') trackEvent('toggle_dark_mode', { mode: event.detail.mode, source: 'manual' });
         });
         applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'professional');
         const savedLang = localStorage.getItem('lang') || 'vi';
