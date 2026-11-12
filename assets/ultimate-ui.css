@@ -11,6 +11,15 @@
   inherits: false;
 }
 
+/* 0. RESET TỐI THIỂU ---------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+h1, h2, h3, p { margin: 0; }
+img { max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { padding: 0; font: inherit; color: inherit; cursor: pointer; background: none; border: 0; }
+input, textarea, select { margin: 0; font: inherit; color: inherit; }
+textarea { resize: vertical; }
+
 /* 1. TOKENS ---------------------------------------------------------------- */
 :root {
   --ui-glow-rgb: 56 189 248;          /* Sky Blue — xem preset trong SKILL.md */
@@ -28,10 +37,20 @@
   --ui-danger: #fb7185;
   --ui-success: #34d399;
 
-  --ui-ring: 3px;                     /* độ dày Border Glow */
+  --ui-ring: 2px;                     /* độ dày viền chạy */
+  --ui-ring-speed: 16s;               /* thời gian một vòng quay (tăng = chậm hơn) */
+  --ui-ring-alpha: .5;                /* độ sáng của vệt chạy (0 = tắt, 1 = rất gắt) */
+  --ui-ring-base: rgb(255 255 255 / .07);   /* vòng viền tĩnh mờ nằm dưới vệt chạy */
+
+  /* Bề mặt phụ: đổi theo chế độ sáng/tối, dùng cho hàng, panel, popup */
+  --ui-surface: rgb(255 255 255 / .04);
+  --ui-border: rgb(255 255 255 / .08);
+  --ui-popover-bg: rgb(15 23 42 / .92);
+  --ui-on-glow: #0f172a;              /* màu chữ đặt trên nền glow (nút khi hover) */
   --ui-radius: 28px;                  /* bo góc ngoài */
   --ui-radius-ctl: 12px;              /* bo góc nút / alert */
-  --ui-font: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ui-font: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color-scheme: dark;
 }
 
 /* 2. LIQUID GRADIENT — nền trang ------------------------------------------- */
@@ -40,6 +59,7 @@
   min-height: 100vh;
   min-height: 100dvh;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);   /* cột co được; thiếu dòng này nội dung rộng sẽ đẩy thẻ tràn ra ngoài */
   place-items: center;
   padding: 24px;
   box-sizing: border-box;
@@ -65,14 +85,30 @@
   box-sizing: border-box;
   padding: var(--ui-ring);
   border-radius: var(--ui-radius);
-  /* Vòng sáng quay quanh viền (hiện trong phần padding, thẻ kính che phần giữa) */
-  background: conic-gradient(from var(--ui-angle), transparent, transparent, var(--ui-glow), transparent);
-  animation: ui-spin 5s linear infinite;
   /* Soft Shadow đa tầng */
   box-shadow:
-    0 4px 6px -1px rgb(0 0 0 / 0.2),
-    0 20px 25px -5px rgb(var(--ui-glow-rgb) / 0.15),
-    0 25px 50px -12px rgb(0 0 0 / 0.5);
+    0 4px 6px -1px rgb(0 0 0 / 0.18),
+    0 20px 25px -5px rgb(var(--ui-glow-rgb) / 0.08),
+    0 25px 50px -12px rgb(0 0 0 / 0.45);
+}
+/* Viền chạy: vệt sáng mờ dần (như sao chổi) quay quanh một vòng viền tĩnh.
+   Dùng mask để chỉ tô đúng phần viền; bản cũ tô cả khối nên ánh sáng lọt qua thẻ kính. */
+.ui-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: var(--ui-ring);
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    conic-gradient(from var(--ui-angle), transparent 0deg, transparent 250deg,
+                   rgb(var(--ui-glow-rgb) / var(--ui-ring-alpha)) 335deg, transparent 360deg),
+    linear-gradient(var(--ui-ring-base), var(--ui-ring-base));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: ui-spin var(--ui-ring-speed) linear infinite;
 }
 .ui-container--wide { width: min(100%, 720px); }
 
@@ -128,6 +164,10 @@
   top: 12px;
   font-size: 16px;
   color: var(--ui-text-sub);
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   pointer-events: none;
   transition: all .3s cubic-bezier(.4, 0, .2, 1);
 }
@@ -213,9 +253,9 @@
 }
 .ui-btn:hover {
   background: var(--ui-glow);
-  color: #0f172a;
+  color: var(--ui-on-glow);
   border-color: transparent;
-  box-shadow: 0 0 20px rgb(var(--ui-glow-rgb) / .6);
+  box-shadow: 0 0 20px rgb(var(--ui-glow-rgb) / .45);
 }
 .ui-btn:active { transform: translateY(1px); }
 .ui-btn:focus-visible { outline: 2px solid var(--ui-glow); outline-offset: 3px; }
@@ -245,40 +285,138 @@
   .ui-card { background: rgb(15 23 42 / .88); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ui-page, .ui-container { animation: none; }
+  .ui-page, .ui-container::before { animation: none; }
   .ui-label, .ui-field::after, .ui-btn { transition: none; }
 }
 
-/* 7. TÙY BIẾN CHO DỰ ÁN digital-business-card --------------------------------
-   Phần lõi ở trên giữ nguyên theo skill; chỉ thêm các điểm riêng của dự án. */
+/* 7. THÀNH PHẦN MỞ RỘNG ------------------------------------------------------ */
 
-/* Font của dự án (đã có sẵn trong assets/inter.css, hỗ trợ tiếng Việt) */
-:root {
-  --ui-font: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
-  color-scheme: dark;                 /* thanh cuộn, control gốc của trình duyệt cũng tối */
+/* Dấu * cho ô bắt buộc: thêm class ui-field--required, không cần gõ * vào nhãn */
+.ui-field--required .ui-label::after { content: " *"; color: var(--ui-glow); }
+
+/* Gợi ý nhập mẫu: hiện trong ô khi đang chọn ô còn trống, biến mất ngay khi bắt đầu gõ.
+   Đặt <span class="ui-hint"> SAU <label>. Nhãn bay lên trước, gợi ý hiện sau (delay). */
+.ui-hint {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 16px;
+  color: var(--ui-text-sub);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+.ui-input:focus:placeholder-shown ~ .ui-hint,
+.ui-textarea:focus:placeholder-shown ~ .ui-hint { opacity: .6; transition-delay: .12s; }
+
+/* Hai ô cùng một hàng, có vạch phân cách mảnh ở giữa. Dưới 340px tự xếp thành một cột. */
+.ui-row { position: relative; display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }
+.ui-row::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  bottom: 42px;
+  width: 1px;
+  background: var(--ui-line);
+  opacity: .6;
+}
+@media (max-width: 340px) {
+  .ui-row { grid-template-columns: 1fr; }
+  .ui-row::before { display: none; }
 }
 
-/* Theme danh thiếp: JS thêm class theme-creative / theme-ocean lên <body>.
-   Phải khai báo lại --ui-glow vì biến này đã được tính sẵn ở :root. */
+/* Thanh điều khiển góc phải + nút sáng/tối (logic nằm trong assets/ui-mode.js) */
+.ui-page--topbar { padding-top: 64px; }
+.ui-topbar { position: absolute; top: 16px; right: 16px; z-index: 1000;   /* absolute: cuộn theo trang, không che nội dung */ display: flex; align-items: center; gap: 8px; }
+.ui-mode-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font: inherit;
+  color: var(--ui-text);
+  cursor: pointer;
+  background: var(--ui-glass-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 50%;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / .5);
+  transition: color .3s ease, transform .2s ease;
+}
+.ui-mode-toggle:hover { color: var(--ui-glow); transform: translateY(-1px); }
+.ui-mode-toggle:active { transform: scale(.94); }
+.ui-mode-toggle:focus-visible { outline: 2px solid var(--ui-glow); outline-offset: 3px; }
+.ui-mode-toggle .fa-sun { display: none; }                        /* biểu tượng thể hiện chế độ hiện tại */
+html[data-mode="light"] .ui-mode-toggle .fa-sun { display: inline-block; }
+html[data-mode="light"] .ui-mode-toggle .fa-moon { display: none; }
+
+@media (max-width: 640px) {
+  .ui-page { padding: 12px; }
+  .ui-page--topbar { padding: 64px 12px 16px; }
+}
+
+/* 8. THEME MÀU DANH THIẾP -----------------------------------------------------
+   JS thêm class theme-creative / theme-ocean lên <body>. Phải khai báo lại --ui-glow
+   vì biến này đã được tính sẵn ở :root. Mặc định (professional) = Sky. */
 body.theme-creative {
-  --ui-glow-rgb: 251 113 133;         /* preset Rose */
+  --ui-glow-rgb: 251 113 133;         /* Rose */
   --ui-glow-deep-rgb: 159 18 57;
   --ui-glow: rgb(var(--ui-glow-rgb));
   --ui-bg-2: #3f0a1c;
   --ui-bg-3: #4a0d24;
 }
 body.theme-ocean {
-  --ui-glow-rgb: 52 211 153;          /* preset Emerald */
+  --ui-glow-rgb: 52 211 153;          /* Emerald */
   --ui-glow-deep-rgb: 4 120 87;
   --ui-glow: rgb(var(--ui-glow-rgb));
   --ui-bg-2: #042f2e;
   --ui-bg-3: #053d33;
 }
 
-/* Tailwind v3.0 (preflight) đặt background-image:none cho button[type=...] và được nạp
-   SAU file này, nên nút mất màu gradient. Tăng độ ưu tiên bằng selector button.ui-btn. */
-button.ui-btn {
-  background: linear-gradient(135deg, rgb(var(--ui-glow-rgb) / .35), rgb(var(--ui-glow-deep-rgb) / .45));
+/* 9. CHẾ ĐỘ SÁNG ---------------------------------------------------------------
+   html[data-mode="light"] do ui-mode.js đặt. Màu glow chuyển sang tông đậm (700) để chữ
+   và gạch chân đủ tương phản trên nền sáng. Muốn đổi màu: sửa các cặp --ui-glow-rgb bên dưới. */
+html[data-mode="light"] {
+  color-scheme: light;
+  --ui-glow-rgb: 3 105 161;           /* Sky 700 */
+  --ui-glow-deep-rgb: 7 89 133;
+  --ui-glow: rgb(var(--ui-glow-rgb));
+  --ui-bg-1: #f0f9ff;
+  --ui-bg-2: #eef2ff;
+  --ui-bg-3: #f5f3ff;
+  --ui-glass-bg: rgb(255 255 255 / .62);
+  --ui-text: #0f172a;
+  --ui-text-sub: #475569;
+  --ui-line: rgb(71 85 105 / .35);
+  --ui-danger: #be123c;
+  --ui-success: #047857;
+  --ui-surface: rgb(255 255 255 / .55);
+  --ui-border: rgb(15 23 42 / .10);
+  --ui-popover-bg: rgb(255 255 255 / .94);
+  --ui-on-glow: #ffffff;
+  --ui-ring-base: rgb(15 23 42 / .08);
 }
-button.ui-btn--ghost { background: transparent; }
-button.ui-btn:hover  { background: var(--ui-glow); }
+html[data-mode="light"] body.theme-creative {
+  --ui-glow-rgb: 190 18 60;           /* Rose 700 */
+  --ui-glow-deep-rgb: 136 19 55;
+  --ui-glow: rgb(var(--ui-glow-rgb));
+  --ui-bg-1: #fff7ed;
+  --ui-bg-2: #fff1f2;
+  --ui-bg-3: #fdf2f8;
+}
+html[data-mode="light"] body.theme-ocean {
+  --ui-glow-rgb: 4 120 87;            /* Emerald 700 */
+  --ui-glow-deep-rgb: 6 78 59;
+  --ui-glow: rgb(var(--ui-glow-rgb));
+  --ui-bg-1: #f0fdfa;
+  --ui-bg-2: #ecfdf5;
+  --ui-bg-3: #f0fdf4;
+}
+html[data-mode="light"] .ui-card { box-shadow: inset 0 1px 1px rgb(255 255 255 / .8); }
