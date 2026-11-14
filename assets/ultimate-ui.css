@@ -22,16 +22,16 @@ textarea { resize: vertical; }
 
 /* 1. TOKENS ---------------------------------------------------------------- */
 :root {
-  --ui-glow-rgb: 56 189 248;          /* Sky Blue — xem preset trong SKILL.md */
-  --ui-glow-deep-rgb: 14 116 144;     /* tông đậm đi kèm, dùng cho nút */
+  --ui-glow-rgb: 56 189 248;          /* Nordic Cobalt (chủ đề gốc) — tối */
+  --ui-glow-deep-rgb: 2 132 199;      /* tông đậm đi kèm, dùng cho nút */
   --ui-glow: rgb(var(--ui-glow-rgb));
 
-  --ui-bg-1: #0f172a;
-  --ui-bg-2: #1e1b4b;
-  --ui-bg-3: #2e1065;
+  --ui-bg-1: #0b0f17;
+  --ui-bg-2: #131b2e;
+  --ui-bg-3: #172033;
 
-  --ui-glass-bg: rgb(15 23 42 / 0.55);
-  --ui-text: #f8fafc;
+  --ui-glass-bg: rgb(15 20 30 / 0.65);
+  --ui-text: #f1f5f9;
   --ui-text-sub: #94a3b8;
   --ui-line: rgb(148 163 184 / 0.3);
   --ui-danger: #fb7185;
@@ -45,8 +45,8 @@ textarea { resize: vertical; }
   /* Bề mặt phụ: đổi theo chế độ sáng/tối, dùng cho hàng, panel, popup */
   --ui-surface: rgb(255 255 255 / .04);
   --ui-border: rgb(255 255 255 / .08);
-  --ui-popover-bg: rgb(15 23 42 / .92);
-  --ui-on-glow: #0f172a;              /* màu chữ đặt trên nền glow (nút khi hover) */
+  --ui-popover-bg: rgb(19 27 46 / .94);
+  --ui-on-glow: #0b0f17;              /* màu chữ đặt trên nền glow (nút khi hover) */
   --ui-radius: 28px;                  /* bo góc ngoài */
   --ui-radius-ctl: 12px;              /* bo góc nút / alert */
   --ui-font: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -213,7 +213,7 @@ textarea { resize: vertical; }
   background-repeat: no-repeat;
   background-position: right 4px center;
 }
-.ui-select option { background: #0f172a; color: var(--ui-text); }
+.ui-select option { background: var(--ui-bg-2); color: var(--ui-text); }
 
 /* Autofill của trình duyệt không được phá nền kính */
 .ui-input:-webkit-autofill {
@@ -282,7 +282,7 @@ textarea { resize: vertical; }
 
 /* 6. DỰ PHÒNG & TRUY CẬP ---------------------------------------------------- */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .ui-card { background: rgb(15 23 42 / .88); }
+  .ui-card { background: var(--ui-popover-bg); }
 }
 @media (prefers-reduced-motion: reduce) {
   .ui-page, .ui-container::before { animation: none; }
@@ -362,36 +362,68 @@ html[data-mode="light"] .ui-mode-toggle .fa-moon { display: none; }
   .ui-page--topbar { padding: 64px 12px 16px; }
 }
 
-/* 8. THEME MÀU DANH THIẾP -----------------------------------------------------
-   JS thêm class theme-creative / theme-ocean lên <body>. Phải khai báo lại --ui-glow
-   vì biến này đã được tính sẵn ở :root. Mặc định (professional) = Sky. */
-body.theme-creative {
-  --ui-glow-rgb: 251 113 133;         /* Rose */
-  --ui-glow-deep-rgb: 159 18 57;
+/* 8. CHỦ ĐỀ MÀU -----------------------------------------------------------------
+   JS (assets/ui-theme.js) đặt html[data-theme]. Chủ đề gốc là Nordic Cobalt (khai báo ở :root
+   và ở mục 9), nên chỉ 3 chủ đề còn lại cần khối riêng. Mỗi chủ đề có 2 khối: tối (mục này) và
+   sáng (mục 9). Hai khối của cùng một chủ đề phải khai báo CÙNG tập biến.
+   Phải khai báo lại --ui-glow trong từng khối vì biến này được tính ngay tại phần tử khai báo.
+   Chế độ tối: nền than/đen ánh sắc độ sáng thấp để vệt sáng viền nổi mà không gắt. */
+
+/* Obsidian & Champagne — tối */
+html[data-theme="champagne"] {
+  --ui-glow-rgb: 245 158 11;
+  --ui-glow-deep-rgb: 180 83 9;
   --ui-glow: rgb(var(--ui-glow-rgb));
-  --ui-bg-2: #3f0a1c;
-  --ui-bg-3: #4a0d24;
+  --ui-bg-1: #0c0a09;
+  --ui-bg-2: #1c1917;
+  --ui-bg-3: #292524;
+  --ui-glass-bg: rgb(20 18 16 / .68);
+  --ui-text: #fafaf9;
+  --ui-text-sub: #a8a29e;
+  --ui-popover-bg: rgb(28 25 23 / .94);
 }
-body.theme-ocean {
-  --ui-glow-rgb: 52 211 153;          /* Emerald */
+
+/* Emerald Graphite — tối */
+html[data-theme="emerald"] {
+  --ui-glow-rgb: 16 185 129;
   --ui-glow-deep-rgb: 4 120 87;
   --ui-glow: rgb(var(--ui-glow-rgb));
-  --ui-bg-2: #042f2e;
-  --ui-bg-3: #053d33;
+  --ui-bg-1: #090d0c;
+  --ui-bg-2: #0f1f1c;
+  --ui-bg-3: #132a25;
+  --ui-glass-bg: rgb(12 22 20 / .65);
+  --ui-text: #ecfdf5;
+  --ui-text-sub: #9ca3af;
+  --ui-popover-bg: rgb(15 31 28 / .94);
+}
+
+/* Royal Indigo & Pearl — tối */
+html[data-theme="indigo"] {
+  --ui-glow-rgb: 129 140 248;
+  --ui-glow-deep-rgb: 79 70 229;
+  --ui-glow: rgb(var(--ui-glow-rgb));
+  --ui-bg-1: #09090b;
+  --ui-bg-2: #141322;
+  --ui-bg-3: #1e1b38;
+  --ui-glass-bg: rgb(17 17 26 / .65);
+  --ui-text: #f8fafc;
+  --ui-text-sub: #a1a1aa;
+  --ui-popover-bg: rgb(20 19 34 / .94);
 }
 
 /* 9. CHẾ ĐỘ SÁNG ---------------------------------------------------------------
-   html[data-mode="light"] do ui-mode.js đặt. Màu glow chuyển sang tông đậm (700) để chữ
-   và gạch chân đủ tương phản trên nền sáng. Muốn đổi màu: sửa các cặp --ui-glow-rgb bên dưới. */
+   html[data-mode="light"] do ui-mode.js đặt. Nền trắng sữa/ngà, màu nhấn tông đậm (700–800)
+   để chữ và gạch chân đủ tương phản. Khối đầu tiên vừa là phần chung của chế độ sáng vừa là
+   bộ màu sáng của Nordic Cobalt; các khối bên dưới ghi đè cho từng chủ đề (độ ưu tiên cao hơn). */
 html[data-mode="light"] {
   color-scheme: light;
-  --ui-glow-rgb: 3 105 161;           /* Sky 700 */
+  --ui-glow-rgb: 3 105 161;           /* Nordic Cobalt — sáng */
   --ui-glow-deep-rgb: 7 89 133;
   --ui-glow: rgb(var(--ui-glow-rgb));
-  --ui-bg-1: #f0f9ff;
-  --ui-bg-2: #eef2ff;
-  --ui-bg-3: #f5f3ff;
-  --ui-glass-bg: rgb(255 255 255 / .62);
+  --ui-bg-1: #faf9f6;
+  --ui-bg-2: #f1f5f9;
+  --ui-bg-3: #e2e8f0;
+  --ui-glass-bg: rgb(255 255 255 / .72);
   --ui-text: #0f172a;
   --ui-text-sub: #475569;
   --ui-line: rgb(71 85 105 / .35);
@@ -403,20 +435,47 @@ html[data-mode="light"] {
   --ui-on-glow: #ffffff;
   --ui-ring-base: rgb(15 23 42 / .08);
 }
-html[data-mode="light"] body.theme-creative {
-  --ui-glow-rgb: 190 18 60;           /* Rose 700 */
-  --ui-glow-deep-rgb: 136 19 55;
+
+/* Obsidian & Champagne — sáng */
+html[data-mode="light"][data-theme="champagne"] {
+  --ui-glow-rgb: 180 83 9;
+  --ui-glow-deep-rgb: 146 64 14;
   --ui-glow: rgb(var(--ui-glow-rgb));
-  --ui-bg-1: #fff7ed;
-  --ui-bg-2: #fff1f2;
-  --ui-bg-3: #fdf2f8;
+  --ui-bg-1: #fdfbf7;
+  --ui-bg-2: #f7f3eb;
+  --ui-bg-3: #efece6;
+  --ui-glass-bg: rgb(255 253 250 / .75);
+  --ui-text: #1c1917;
+  --ui-text-sub: #57534e;
+  --ui-popover-bg: rgb(255 255 255 / .94);
 }
-html[data-mode="light"] body.theme-ocean {
-  --ui-glow-rgb: 4 120 87;            /* Emerald 700 */
-  --ui-glow-deep-rgb: 6 78 59;
+
+/* Emerald Graphite — sáng */
+html[data-mode="light"][data-theme="emerald"] {
+  --ui-glow-rgb: 4 120 87;
+  --ui-glow-deep-rgb: 6 95 70;
   --ui-glow: rgb(var(--ui-glow-rgb));
-  --ui-bg-1: #f0fdfa;
-  --ui-bg-2: #ecfdf5;
-  --ui-bg-3: #f0fdf4;
+  --ui-bg-1: #f9fafb;
+  --ui-bg-2: #f0fdf4;
+  --ui-bg-3: #e6f4ea;
+  --ui-glass-bg: rgb(255 255 255 / .75);
+  --ui-text: #064e3b;
+  --ui-text-sub: #4b5563;
+  --ui-popover-bg: rgb(255 255 255 / .94);
 }
+
+/* Royal Indigo & Pearl — sáng */
+html[data-mode="light"][data-theme="indigo"] {
+  --ui-glow-rgb: 67 56 202;
+  --ui-glow-deep-rgb: 55 48 163;
+  --ui-glow: rgb(var(--ui-glow-rgb));
+  --ui-bg-1: #fafafa;
+  --ui-bg-2: #f4f3ff;
+  --ui-bg-3: #ecebfa;
+  --ui-glass-bg: rgb(255 255 255 / .75);
+  --ui-text: #1e1b4b;
+  --ui-text-sub: #52525b;
+  --ui-popover-bg: rgb(255 255 255 / .94);
+}
+
 html[data-mode="light"] .ui-card { box-shadow: inset 0 1px 1px rgb(255 255 255 / .8); }
