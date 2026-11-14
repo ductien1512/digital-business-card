@@ -22,6 +22,8 @@
     <script src="assets/firebase-database-compat.js"></script>
     <!-- Chế độ sáng/tối: nạp sớm để không bị nháy màu -->
     <script src="assets/ui-mode.js"></script>
+    <!-- Chủ đề màu: nạp sớm, cùng lý do -->
+    <script src="assets/ui-theme.js"></script>
     <!-- Phong cách Ultimate UI 3-in-1 (Neo-Glass + Floating Label + Liquid Gradient) -->
     <link rel="stylesheet" href="assets/ultimate-ui.css">
     <style>
@@ -450,16 +452,6 @@
             }
         };
 
-        const THEME_STORAGE_KEY = 'cardTheme';
-        const VALID_THEMES = ['professional', 'creative', 'ocean'];
-
-        function applyTheme(theme) {
-            const selectedTheme = VALID_THEMES.includes(theme) ? theme : 'professional';
-            document.body.classList.remove(...VALID_THEMES.map(name => `theme-${name}`));
-            if (selectedTheme !== 'professional') document.body.classList.add(`theme-${selectedTheme}`);
-            localStorage.setItem(THEME_STORAGE_KEY, selectedTheme);
-        }
-
         let entranceAnimationPlayed = false;
 
         function playEntranceAnimations() {
@@ -509,7 +501,7 @@
             database.ref('profile').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    applyTheme(data.theme || localStorage.getItem(THEME_STORAGE_KEY) || 'professional');
+                    UITheme.apply(data.theme || UITheme.saved());   // nhận cả tên chủ đề cũ
                     // Update profile information
                     document.getElementById('userName').textContent = data.name || 'Trần Đức Tiền';
                     document.getElementById('userPhone').textContent = data.phone || '+84396558306';
@@ -683,7 +675,7 @@
         document.addEventListener('ui:modechange', (event) => {
             if (event.detail.source === 'manual') trackEvent('toggle_dark_mode', { mode: event.detail.mode, source: 'manual' });
         });
-        applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'professional');
+        UITheme.apply(UITheme.saved());
         const savedLang = localStorage.getItem('lang') || 'vi';
         setLanguage(savedLang);
         loadUserData();

@@ -12,6 +12,8 @@
     <script src="assets/firebase-auth-compat.js"></script>
     <!-- Chế độ sáng/tối: nạp sớm để không bị nháy màu -->
     <script src="assets/ui-mode.js"></script>
+    <!-- Chủ đề màu: nạp sớm, cùng lý do -->
+    <script src="assets/ui-theme.js"></script>
     <!-- Phong cách Ultimate UI 3-in-1 (Neo-Glass + Floating Label + Liquid Gradient) -->
     <link rel="stylesheet" href="assets/ultimate-ui.css">
     <style>
@@ -117,16 +119,17 @@
             transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
         }
         .theme-option input { accent-color: var(--ui-glow); }
-        .theme-option small { color: var(--ui-text-sub); }
+        .theme-option small { color: var(--ui-text-sub); text-wrap: balance; }   /* tránh ngắt chữ lẻ ở dòng cuối */
         .theme-option:hover { border-color: rgb(var(--ui-glow-rgb) / .45); }
         .theme-option.selected {
             border-color: var(--ui-glow); background: rgb(var(--ui-glow-rgb) / .10);
             box-shadow: 0 0 20px -4px rgb(var(--ui-glow-rgb) / .45);
         }
         .theme-swatch { width: 42px; height: 42px; border-radius: 10px; flex: 0 0 auto; }
-        .theme-swatch.professional { background: linear-gradient(135deg, rgb(56 189 248), rgb(14 116 144)); }
-        .theme-swatch.creative     { background: linear-gradient(135deg, rgb(251 113 133), rgb(159 18 57)); }
-        .theme-swatch.ocean        { background: linear-gradient(135deg, rgb(52 211 153), rgb(4 120 87)); }
+        .theme-swatch.nordic    { background: linear-gradient(135deg, rgb(56 189 248), rgb(2 132 199)); }
+        .theme-swatch.champagne { background: linear-gradient(135deg, rgb(245 158 11), rgb(180 83 9)); }
+        .theme-swatch.emerald   { background: linear-gradient(135deg, rgb(16 185 129), rgb(4 120 87)); }
+        .theme-swatch.indigo    { background: linear-gradient(135deg, rgb(129 140 248), rgb(79 70 229)); }
 
         /* Thanh hành động */
         .action-buttons { display: grid; grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); gap: 10px; margin-top: 22px; }   /* Cập nhật : Đăng xuất = 2.5 : 1 */
@@ -318,20 +321,25 @@
                 <div id="themeTab" class="tab-content">
                     <p class="field-caption">Chọn giao diện danh thiếp</p>
                     <div class="theme-options">
-                        <label class="theme-option" data-theme-option="professional">
-                            <input type="radio" name="theme" value="professional" onchange="selectTheme('professional')">
-                            <span class="theme-swatch professional"></span>
-                            <span><strong>Professional</strong><br><small>Xanh trời lịch lãm</small></span>
+                        <label class="theme-option" data-theme-option="nordic">
+                            <input type="radio" name="theme" value="nordic" onchange="selectTheme('nordic')">
+                            <span class="theme-swatch nordic"></span>
+                            <span><strong>Nordic Cobalt</strong><br><small>Xanh thép Bắc Âu · chuẩn mực, tinh tế</small></span>
                         </label>
-                        <label class="theme-option" data-theme-option="creative">
-                            <input type="radio" name="theme" value="creative" onchange="selectTheme('creative')">
-                            <span class="theme-swatch creative"></span>
-                            <span><strong>Creative</strong><br><small>Hồng năng động</small></span>
+                        <label class="theme-option" data-theme-option="champagne">
+                            <input type="radio" name="theme" value="champagne" onchange="selectTheme('champagne')">
+                            <span class="theme-swatch champagne"></span>
+                            <span><strong>Obsidian &amp; Champagne</strong><br><small>Vàng champagne &amp; than chì · sang trọng</small></span>
                         </label>
-                        <label class="theme-option" data-theme-option="ocean">
-                            <input type="radio" name="theme" value="ocean" onchange="selectTheme('ocean')">
-                            <span class="theme-swatch ocean"></span>
-                            <span><strong>Ocean</strong><br><small>Xanh ngọc hiện đại</small></span>
+                        <label class="theme-option" data-theme-option="emerald">
+                            <input type="radio" name="theme" value="emerald" onchange="selectTheme('emerald')">
+                            <span class="theme-swatch emerald"></span>
+                            <span><strong>Emerald Graphite</strong><br><small>Xanh ngọc lục bảo &amp; xám khói · hiện đại</small></span>
+                        </label>
+                        <label class="theme-option" data-theme-option="indigo">
+                            <input type="radio" name="theme" value="indigo" onchange="selectTheme('indigo')">
+                            <span class="theme-swatch indigo"></span>
+                            <span><strong>Royal Indigo &amp; Pearl</strong><br><small>Tím chàm &amp; trắng ngọc trai · sáng tạo</small></span>
                         </label>
                     </div>
                 </div>
@@ -472,14 +480,10 @@
             });
         }
 
-        const VALID_THEMES = ['professional', 'creative', 'ocean'];
-        let selectedTheme = localStorage.getItem('cardTheme') || 'professional';
+        let selectedTheme = UITheme.saved();
 
         function applyAdminTheme(theme) {
-            selectedTheme = VALID_THEMES.includes(theme) ? theme : 'professional';
-            document.body.classList.remove(...VALID_THEMES.map(name => `theme-${name}`));
-            if (selectedTheme !== 'professional') document.body.classList.add(`theme-${selectedTheme}`);
-            localStorage.setItem('cardTheme', selectedTheme);
+            selectedTheme = UITheme.apply(theme);   // đổi màu ngay (xem trước) + chuẩn hoá tên chủ đề cũ
             document.querySelectorAll('[data-theme-option]').forEach(option => option.classList.toggle('selected', option.dataset.themeOption === selectedTheme));
             const radio = document.querySelector(`input[name="theme"][value="${selectedTheme}"]`);
             if (radio) radio.checked = true;
