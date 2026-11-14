@@ -26,19 +26,19 @@ textarea { resize: vertical; }
   --ui-glow-deep-rgb: 14 116 144;     /* tông đậm đi kèm, dùng cho nút */
   --ui-glow: rgb(var(--ui-glow-rgb));
 
-  --ui-bg-1: #0f172a;
-  --ui-bg-2: #1e1b4b;
-  --ui-bg-3: #2e1065;
+  --ui-bg-1: #0b0f19;
+  --ui-bg-2: #111827;
+  --ui-bg-3: #1f2937;
 
-  --ui-glass-bg: rgb(15 23 42 / 0.55);
+  --ui-glass-bg: rgb(17 24 39 / .7);
   --ui-text: #f8fafc;
-  --ui-text-sub: #94a3b8;
-  --ui-line: rgb(148 163 184 / 0.3);
+  --ui-text-sub: #9ca3af;
+  --ui-line: rgb(156 163 175 / .2);
   --ui-danger: #fb7185;
   --ui-success: #34d399;
 
   --ui-ring: 2px;                     /* độ dày viền chạy */
-  --ui-ring-speed: 16s;               /* thời gian một vòng quay (tăng = chậm hơn) */
+  --ui-ring-speed: 7s;               /* thời gian một vòng quay (tăng = chậm hơn) */
   --ui-ring-alpha: .5;                /* độ sáng của vệt chạy (0 = tắt, 1 = rất gắt) */
   --ui-ring-base: rgb(255 255 255 / .07);   /* vòng viền tĩnh mờ nằm dưới vệt chạy */
 
@@ -385,16 +385,16 @@ body.theme-ocean {
    và gạch chân đủ tương phản trên nền sáng. Muốn đổi màu: sửa các cặp --ui-glow-rgb bên dưới. */
 html[data-mode="light"] {
   color-scheme: light;
-  --ui-glow-rgb: 3 105 161;           /* Sky 700 */
-  --ui-glow-deep-rgb: 7 89 133;
+  --ui-glow-rgb: 14 165 233;           /* Sky 700 */
+  --ui-glow-deep-rgb: 3 105 161;
   --ui-glow: rgb(var(--ui-glow-rgb));
-  --ui-bg-1: #f0f9ff;
-  --ui-bg-2: #eef2ff;
-  --ui-bg-3: #f5f3ff;
-  --ui-glass-bg: rgb(255 255 255 / .62);
+  --ui-bg-1: #f8fafc;
+  --ui-bg-2: #f1f5f9;
+  --ui-bg-3: #e2e8f0;
+  --ui-glass-bg: rgb(255 255 255 / .85);
   --ui-text: #0f172a;
-  --ui-text-sub: #475569;
-  --ui-line: rgb(71 85 105 / .35);
+  --ui-text-sub: #64748b;
+  --ui-line: rgb(100 116 139 / .25);
   --ui-danger: #be123c;
   --ui-success: #047857;
   --ui-surface: rgb(255 255 255 / .55);
