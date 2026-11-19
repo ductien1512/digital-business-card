@@ -496,11 +496,17 @@
         }
 
         // Load data from Firebase
+        const PROFILE_CACHE_KEY = 'cardProfile';   // hồ sơ gần nhất, dùng khi không có mạng
+        const OFFLINE_FALLBACK_MS = 4000;          // Firebase không báo lỗi khi mất mạng, nó chỉ chờ
+
         function loadUserData() {
             if (!database) return;
-            database.ref('profile').on('value', (snapshot) => {
+            let received = false;
+            const render = (snapshot) => {
+                received = true;
                 const data = snapshot.val();
                 if (data) {
+                    try { localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
                     UITheme.apply(data.theme || UITheme.saved());   // nhận cả tên chủ đề cũ
                     // Update profile information
                     document.getElementById('userName').textContent = data.name || 'Trần Đức Tiền';
@@ -526,9 +532,20 @@
                 } else {
                     showOfflineCard();   // chưa có dữ liệu hồ sơ: dùng thông tin mặc định thay vì treo ở "Đang tải"
                 }
-            }, (error) => {
+            };
+            database.ref('profile').on('value', render, (error) => {
                 showFirebaseError(error.message);
             });
+
+            // Chưa có dữ liệu sau OFFLINE_FALLBACK_MS (hoặc đang offline): hiện hồ sơ đã lưu, nếu chưa có thì mặc định.
+            // Khi Firebase kết nối lại, callback ở trên tự cập nhật thẻ.
+            const useCachedProfile = () => {
+                if (received) return;
+                let cached = null;
+                try { cached = JSON.parse(localStorage.getItem(PROFILE_CACHE_KEY)); } catch (e) {}
+                render({ val: () => cached });
+            };
+            if (navigator.onLine === false) useCachedProfile(); else setTimeout(useCachedProfile, OFFLINE_FALLBACK_MS);
         }
 
         // GA4 Event Tracking
@@ -679,6 +696,12 @@
         const savedLang = localStorage.getItem('lang') || 'vi';
         setLanguage(savedLang);
         loadUserData();
+    </script>
+    <script>
+        // Offline: lưu sẵn giao diện để mở lại được khi không có mạng (xem sw.js). Chỉ chạy trên http/https.
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+        }
     </script>
 </body>
 </html>

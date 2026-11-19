@@ -691,5 +691,11 @@
             }
         });
     </script>
+    <script>
+        // Offline: lưu sẵn giao diện để mở lại được khi không có mạng (xem sw.js). Chỉ chạy trên http/https.
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+        }
+    </script>
 </body>
 </html>
